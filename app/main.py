@@ -1,7 +1,6 @@
 import threading
 from settings import load_settings
-from components import button,led
-import time
+from components import button,led,uds
 from colorama import Fore
 from events.DoorLightOffEvent import DoorLightOffEvent
 from events.DoorLightOnEvent import DoorLightOnEvent
@@ -43,6 +42,8 @@ if __name__ == "__main__":
                 button.run_button(settings[key],devices_threads,key,stop_event)
             if(key in ["DL"]):
                 led.run_led(settings[key],devices_threads,door_light_on_event, door_light_off_event, stop_event)
+            if(key in ["DUS1"]):
+                uds.run_uds(settings[key],devices_threads,key, stop_event)
         while True:
             pass
             
