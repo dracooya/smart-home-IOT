@@ -1,0 +1,61 @@
+{    
+    "DS1": {
+        "simulated": true,
+        "pins": [27],
+        "pi": 1
+    },
+
+    "DL": {
+        "simulated": true,
+        "pins": [22],
+        "pi": 1
+    },
+
+    "DUS1": {
+        "simulated": true,
+        "pins": [23, 24],   
+        "pi": 1
+    },
+
+    "DB": {
+        "simulated": true,
+        "pins": [14],
+        "pi": 1
+    },
+
+    "DPIR1": {
+        "simulated": true,
+        "pins": [15],
+        "pi": 1
+    },
+
+    "DMS": {
+        "simulated": true,
+        "pins": [25,8,7,1,12,16,20,21],
+        "pi": 1
+    },
+
+    "RPIR1": {
+        "simulated": true,
+        "pins": [10],
+        "pi": 1
+    },
+
+    "RPIR2": {
+        "simulated": true,
+        "pins": [9],
+        "pi": 1
+    },
+
+    "RDHT1": {
+        "simulated": true,
+        "pins": [17],
+        "pi": 1
+    },
+
+    "RDHT2": {
+        "simulated": true,
+        "pins": [11],
+        "pi": 1
+    }
+}
