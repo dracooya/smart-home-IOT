@@ -2,7 +2,7 @@ import threading
 
 from colorama import Fore
 
-from components import button, led, uds, buzzer, pir
+from components import button, led, uds, buzzer, pir, dht
 from events.BuzzerPressEvent import BuzzerPressEvent
 from events.BuzzerReleaseEvent import BuzzerReleaseEvent
 from events.DoorLightOffEvent import DoorLightOffEvent
@@ -67,6 +67,8 @@ def main():
                 buzzer.run_buzzer(settings[key], devices_threads, buzzer_press_event, buzzer_release_event, stop_event)
             if key in ["DPIR1", "RPIR1", "RPIR2"]:
                 pir.run(settings[key], devices_threads, key, stop_event)
+            if key in ["RDHT1", "RDHT2"]:
+                dht.run(settings[key], devices_threads, key, stop_event)
         while True:
             pass
 
