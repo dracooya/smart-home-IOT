@@ -1,9 +1,9 @@
 import threading
 from simulators.led import run_led_simulator
-from helpers.printer import printStatus
+from helpers.printer import print_status
 
 def led_callback(status):
-    printStatus("DL", status)
+    print_status("DL", status)
 
 
 def run_led(settings, threads, door_light_on_event, door_light_off_event, stop_event):
