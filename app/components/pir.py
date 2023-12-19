@@ -1,17 +1,46 @@
 import threading
-
 from helpers.printer import print_status
+import time
+from value_queue import value_queue
+import json
 
+pir_id = ""
+pir_settings = {}
 
 def motion(code):
     print_status(code, "MOTION DETECTED")
+    val = {
+        "measurementName": "PIRStatus",
+        "timestamp": round(time.time()*1000),
+        "value": "MOTION",
+        "deviceId": pir_id,
+        "deviceType": "PIR",
+        "isSimulated": pir_settings["simulated"],
+        "valueType": "str"
+
+    }
+    value_queue.put(val)
 
 
 def no_motion(code):
     print_status(code, "NO MOTION")
+    val = {
+        "measurementName": "PIRStatus",
+        "timestamp": round(time.time()*1000),
+        "value": "NO-MOTION",
+        "deviceId": pir_id,
+        "deviceType": "PIR",
+        "isSimulated": pir_settings["simulated"],
+        "valueType": "str"
+
+    }
+    value_queue.put(val)
 
 
-def run(settings, threads, code, stop_event):
+def run(id, settings, threads, code, stop_event):
+    global pir_id, pir_settings
+    pir_id = id
+    pir_settings = settings
     if settings['simulated']:
         from simulators.pir import simulate
         thread = threading.Thread(target=simulate,

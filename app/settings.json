@@ -2,60 +2,70 @@
     "DS1": {
         "simulated": true,
         "pins": [27],
-        "pi": 1
+        "pi": 1,
+        "name": "Door Sensor (Button) - Porch"
     },
 
     "DL": {
         "simulated": true,
         "pins": [22],
-        "pi": 1
+        "pi": 1,
+        "name": "Door Light (LED diode)"
     },
 
     "DUS1": {
         "simulated": true,
         "pins": [23, 24],   
-        "pi": 1
+        "pi": 1,
+        "name": "Door Ultrasonic Sensor - Porch"
     },
 
     "DB": {
         "simulated": true,
         "pins": [14],
-        "pi": 1
+        "pi": 1,
+        "name": "Door Buzzer"
     },
 
     "DPIR1": {
         "simulated": true,
         "pins": [15],
-        "pi": 1
+        "pi": 1,
+        "name": "Door Motion Sensor - Porch"
     },
 
     "DMS": {
         "simulated": true,
         "pins": [25,8,7,1,12,16,20,21],
-        "pi": 1
+        "pi": 1,
+        "name": "Door Membrane Switch - Foyer"
     },
 
     "RPIR1": {
         "simulated": true,
         "pins": [10],
-        "pi": 1
+        "pi": 1,
+        "name": "Room Motion Sensor - Foyer"
     },
 
     "RPIR2": {
         "simulated": true,
         "pins": [9],
-        "pi": 1
+        "pi": 1,
+        "name": "Motion Sensor - Stairs"
     },
 
     "RDHT1": {
         "simulated": true,
         "pins": [17],
-        "pi": 1
+        "pi": 1,
+        "name": "Temperature And Humidity Sensor - Bedroom 2"
     },
 
     "RDHT2": {
         "simulated": true,
         "pins": [11],
-        "pi": 1
+        "pi": 1,
+        "name": "Temperature And Humidity Sensor - Bedroom 3"
     }
 }

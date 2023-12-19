@@ -1,6 +1,7 @@
 class Event(object):
     def __init__(self):
         self.__listeners = []
+        self.msg = ""
     
     @property
     def on(self):

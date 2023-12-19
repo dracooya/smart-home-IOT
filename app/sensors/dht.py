@@ -80,25 +80,25 @@ class DHT(object):
         return self.DHTLIB_OK
 
 
-def run(pin, code, callback, stop_event, delay):
+def run(pin, callback, stop_event, delay):
     dht = DHT(pin)  # create a DHT class object
     sum_count = 0  # number of reading times
     while True:
         sum_count += 1  # counting number of reading times
         chk = dht.readDHT11()  # read DHT11 and get a return value. Then determine whether data read is normal according to the return value.
-        callback("The sum_count is : %d, \t chk    : %d" % (sum_count, chk))
+        #callback("The sum_count is : %d, \t chk    : %d" % (sum_count, chk))
         if chk is dht.DHTLIB_OK:  # read DHT11 and get a return value. Then determine whether data read is normal according to the return value.
-            callback("DHT11,OK!")
+            #callback("DHT11,OK!")
+            pass
         elif chk is dht.DHTLIB_ERROR_CHECKSUM:  # data check has errors
-            callback("DHTLIB_ERROR_CHECKSUM!!")
+            callback(-1)
         elif chk is dht.DHTLIB_ERROR_TIMEOUT:  # reading DHT times out
-            callback("DHTLIB_ERROR_TIMEOUT!")
+            callback(-2)
         else:  # other errors
-            callback("Other error!")
+            callback(-3)
 
         if stop_event.is_set():
             break
 
-        msg = f"Humidity: {dht.humidity:.2f}, Temperature: {dht.temperature:.2f}"
-        callback(code, msg)
+        callback(dht.humidity, dht.temperature)
         time.sleep(delay)

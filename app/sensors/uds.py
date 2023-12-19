@@ -42,9 +42,9 @@ def run_uds_loop(pins, uds_code, callback, stop_event, delay):
     while True:
         distance = get_distance(pins)
         if distance is not None:
-            callback(uds_code, f'DISTANCE: {distance} cm')
+            callback(uds_code, distance)
         else:
-            callback(uds_code, 'MEASUREMENT TIMED OUT')
+            callback(uds_code, -1)
         if stop_event.is_set():
             break
         time.sleep(delay)

@@ -8,6 +8,7 @@ from events.BuzzerReleaseEvent import BuzzerReleaseEvent
 from events.DoorLightOffEvent import DoorLightOffEvent
 from events.DoorLightOnEvent import DoorLightOnEvent
 from settings import load_settings
+from mqtt_publisher import publisher_task
 
 try:
     import RPi.GPIO as GPIO
@@ -24,7 +25,7 @@ buzzer_release_event = BuzzerReleaseEvent()
 
 def user_input(stop_event):
     while True:
-        some_input = input()
+        some_input = input('\n')
         if some_input == "x" or some_input == "X":
             door_light_on_event.trigger()
         elif some_input == "z" or some_input == "Z":
@@ -55,29 +56,29 @@ def main():
     print(Fore.MAGENTA + "----------------------------------------------------------------------")
     t2 = threading.Thread(target=user_input, args=(stop_event,), daemon=True)
     t2.start()
+    publisher_thread = threading.Thread(target=publisher_task, args=(stop_event,), daemon=True)
+    publisher_thread.start()
     try:
         for key in settings:
             if key in ["DS1"]:
-                button.run_button(settings[key], devices_threads, key, stop_event)
+                button.run_button(key, settings[key], devices_threads, key, stop_event)
             if key in ["DL"]:
-                led.run_led(settings[key], devices_threads, door_light_on_event, door_light_off_event, stop_event)
+                led.run_led(key, settings[key], devices_threads, door_light_on_event, door_light_off_event, stop_event)
             if key in ["DUS1"]:
-                uds.run_uds(settings[key], devices_threads, key, stop_event)
+                uds.run_uds(key, settings[key], devices_threads, key, stop_event)
             if key in ["DB"]:
-                buzzer.run_buzzer(settings[key], devices_threads, buzzer_press_event, buzzer_release_event, stop_event)
+                buzzer.run_buzzer(key, settings[key], devices_threads, buzzer_press_event, buzzer_release_event, stop_event)
             if key in ["DPIR1", "RPIR1", "RPIR2"]:
-                pir.run(settings[key], devices_threads, key, stop_event)
+                pir.run(key, settings[key], devices_threads, key, stop_event)
             if key in ["RDHT1", "RDHT2"]:
-                dht.run(settings[key], devices_threads, key, stop_event)
+                dht.run(key, settings[key], devices_threads, key, stop_event)
             if key in ["DMS"]:
-                dms.run(settings[key], devices_threads, key, stop_event)
+                dms.run(key, settings[key], devices_threads, key, stop_event)
         while True:
             pass
 
     except KeyboardInterrupt:
-        for thread in devices_threads:
-            stop_event.set()
-
+        stop_event.set()
 
 if __name__ == "__main__":
     main()
