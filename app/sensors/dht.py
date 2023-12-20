@@ -91,11 +91,11 @@ def run(pin, callback, stop_event, delay):
             #callback("DHT11,OK!")
             pass
         elif chk is dht.DHTLIB_ERROR_CHECKSUM:  # data check has errors
-            callback(-1)
+            callback(-1, -1)
         elif chk is dht.DHTLIB_ERROR_TIMEOUT:  # reading DHT times out
-            callback(-2)
+            callback(-2, -2)
         else:  # other errors
-            callback(-3)
+            callback(-3, -3)
 
         if stop_event.is_set():
             break

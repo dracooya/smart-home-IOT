@@ -1,0 +1,5 @@
+HOSTNAME = "localhost"
+PORT = 1883
+INFLUXDB_URL = "http://localhost:8086"
+INFLUXDB_TOKEN = "I2k_PZ-qA779B9WYsz4zshkU7C-cibk_EJOt-JEwSmSskZW377AXwrIQVOO5w2QIGDiu_x7srg-lTV7jtCraNw=="
+INFLUXDB_ORG = "Tiba"

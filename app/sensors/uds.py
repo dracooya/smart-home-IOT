@@ -38,13 +38,14 @@ def get_distance(pins):
     distance = (pulse_duration * 34300)/2
     return distance
 
-def run_uds_loop(pins, uds_code, callback, stop_event, delay):
+
+def run_uds_loop(pins, callback, stop_event, delay):
     while True:
         distance = get_distance(pins)
         if distance is not None:
-            callback(uds_code, distance)
+            callback(distance)
         else:
-            callback(uds_code, -1)
+            callback(-1)
         if stop_event.is_set():
             break
         time.sleep(delay)

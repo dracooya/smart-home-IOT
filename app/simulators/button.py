@@ -2,9 +2,9 @@ import time
 import random
 
 
-def run_button_simulator(callback, button_code, stop_event):
+def run_button_simulator(callback, stop_event):
     while True:
         time.sleep(random.randint(2, 10))
-        callback(button_code)
+        callback()
         if stop_event.is_set():
             break

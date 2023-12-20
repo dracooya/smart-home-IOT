@@ -42,7 +42,6 @@ def user_input(stop_event):
 
 
 def main():
-    global settings
     settings = load_settings()
     devices_threads = []
     stop_event = threading.Event()
@@ -61,24 +60,26 @@ def main():
     try:
         for key in settings:
             if key in ["DS1"]:
-                button.run_button(key, settings[key], devices_threads, key, stop_event)
+                button.run_button(key, settings[key], devices_threads, stop_event)
             if key in ["DL"]:
                 led.run_led(key, settings[key], devices_threads, door_light_on_event, door_light_off_event, stop_event)
             if key in ["DUS1"]:
-                uds.run_uds(key, settings[key], devices_threads, key, stop_event)
+                uds.run_uds(key, settings[key], devices_threads, stop_event)
             if key in ["DB"]:
-                buzzer.run_buzzer(key, settings[key], devices_threads, buzzer_press_event, buzzer_release_event, stop_event)
+                buzzer.run_buzzer(key, settings[key], devices_threads, buzzer_press_event, buzzer_release_event,
+                                  stop_event)
             if key in ["DPIR1", "RPIR1", "RPIR2"]:
-                pir.run(key, settings[key], devices_threads, key, stop_event)
+                pir.run(key, settings[key], devices_threads, stop_event)
             if key in ["RDHT1", "RDHT2"]:
-                dht.run(key, settings[key], devices_threads, key, stop_event)
+                dht.run(key, settings[key], devices_threads, stop_event)
             if key in ["DMS"]:
-                dms.run(key, settings[key], devices_threads, key, stop_event)
+                dms.run(key, settings[key], devices_threads, stop_event)
         while True:
             pass
 
     except KeyboardInterrupt:
         stop_event.set()
+
 
 if __name__ == "__main__":
     main()

@@ -1,40 +1,37 @@
 import threading
-from simulators.buzzer import run_buzzer_simulator
-from helpers.printer import print_status
 import time
+
+from helpers.printer import print_status
+from simulators.buzzer import run_buzzer_simulator
 from value_queue import value_queue
-import json
 
-buzzer_id = ""
-buzzer_settings = {}
 
-def buzzer_callback(status):
-    print_status("DB", status)
+def buzzer_callback(code, settings, status):
+    print_status(code, status)
     val = {
         "measurementName": "buzzerStatus",
-        "timestamp": round(time.time()*1000),
+        "timestamp": round(time.time() * 1000),
         "value": status,
-        "deviceId": buzzer_id,
+        "deviceId": code,
         "deviceType": "BUZZER",
-        "isSimulated": buzzer_settings["simulated"],
-        "valueType": "str"
+        "isSimulated": settings["simulated"]
 
     }
     value_queue.put(val)
 
 
-def run_buzzer(id, settings, threads, buzzer_press_event, buzzer_release_event, stop_event):
-    global buzzer_id, buzzer_settings
-    buzzer_id = id
-    buzzer_settings = settings
+def run_buzzer(code, settings, threads, buzzer_press_event, buzzer_release_event, stop_event):
     if settings['simulated']:
         buzzer_thread = threading.Thread(target=run_buzzer_simulator,
-                                         args=(buzzer_callback, buzzer_press_event, buzzer_release_event, stop_event))
+                                         args=(lambda status: buzzer_callback(code, settings, status),
+                                               buzzer_press_event, buzzer_release_event, stop_event))
         buzzer_thread.start()
         threads.append(buzzer_thread)
     else:
         from actuators.buzzer import buzzer_register
-        buzzer_thread = threading.Thread(target=buzzer_register, args=(
-        settings["pins"][0], 400, buzzer_callback, buzzer_press_event, buzzer_release_event))
+        buzzer_thread = threading.Thread(target=buzzer_register, args=(settings["pins"][0], 400,
+                                                                       lambda status: buzzer_callback(code, settings,
+                                                                                                      status),
+                                                                       buzzer_press_event, buzzer_release_event))
         buzzer_thread.start()
         threads.append(buzzer_thread)
