@@ -29,7 +29,7 @@ def run_buzzer(code, settings, threads, buzzer_press_event, buzzer_release_event
         threads.append(buzzer_thread)
     else:
         from actuators.buzzer import buzzer_register
-        buzzer_thread = threading.Thread(target=buzzer_register, args=(settings["pins"][0], 400,
+        buzzer_thread = threading.Thread(target=buzzer_register, args=(settings["pins"][0], 2000,
                                                                        lambda status: buzzer_callback(code, settings,
                                                                                                       status),
                                                                        buzzer_press_event, buzzer_release_event))

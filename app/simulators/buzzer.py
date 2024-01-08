@@ -18,8 +18,8 @@ def run_buzzer_simulator(callback_fc, buzzer_press_event, buzzer_release_event, 
     @buzzer_press_event.on
     def buzzer_press():
         stop_event_audio.clear()
-        audio_thread = threading.Thread(target=sound_play, args=(stop_event_audio,))
-        audio_thread.start()
+        #audio_thread = threading.Thread(target=sound_play, args=(stop_event_audio,))
+        #audio_thread.start()
         callback_fc("PRESSED")
 
     @buzzer_release_event.on
