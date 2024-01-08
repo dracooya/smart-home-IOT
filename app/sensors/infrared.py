@@ -71,7 +71,7 @@ def convertHex(binaryValue):
 	tmpB2 = int(str(binaryValue),2) #Temporarely propper base 2
 	return hex(tmpB2)
 
-def infrared_register(pin, callback, stop_event):
+def infrared_register(pin, callback, stop_event, client):
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(pin, GPIO.IN)
 	
@@ -82,4 +82,5 @@ def infrared_register(pin, callback, stop_event):
                 callback(ButtonsNames[button]) #Prints corresponding english name for button
         if stop_event.is_set():
             GPIO.cleanup()
+            client.disconnect()
             break
