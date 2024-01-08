@@ -1,0 +1,38 @@
+{
+    "DS2": {
+        "simulated": true,
+        "pins": [27],
+        "pi": 2,
+        "name": "Door Sensor (Button) - Garage"
+    },
+    "DUS2": {
+        "simulated": true,
+        "pins": [23, 24],
+        "pi": 2,
+        "name": "Door Ultrasonic Sensor - Garage"
+    },
+    "DPIR2": {
+        "simulated": true,
+        "pins": [15],
+        "pi": 2,
+        "name": "Door Motion Sensor - Garage"
+    },
+    "RPIR3": {
+        "simulated": true,
+        "pins": [10],
+        "pi": 2,
+        "name": "Motion Sensor - Kitchen"
+    },
+    "GDHT": {
+        "simulated": true,
+        "pins": [17],
+        "pi": 2,
+        "name": "Temperature And Humidity Sensor - Garage"
+    },
+    "RDHT3": {
+        "simulated": true,
+        "pins": [11],
+        "pi": 2,
+        "name": "Temperature And Humidity Sensor - Kitchen"
+    }
+}

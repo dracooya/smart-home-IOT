@@ -72,18 +72,18 @@ def main():
     publisher_thread.start()
     try:
         for key in settings:
-            if key in ["DS1"]:
+            if key in ["DS1", "DS2"]:
                 button.run_button(key, settings[key], devices_threads, stop_event)
             if key in ["DL"]:
                 led.run_led(key, settings[key], devices_threads, door_light_on_event, door_light_off_event, stop_event)
-            if key in ["DUS1"]:
+            if key in ["DUS1", "DUS2"]:
                 uds.run_uds(key, settings[key], devices_threads, stop_event)
             if key in ["DB","BB"]:
                 buzzer.run_buzzer(key, settings[key], devices_threads, buzzer_press_event, buzzer_release_event,
                                   stop_event)
-            if key in ["DPIR1", "RPIR1", "RPIR2", "RPIR4"]:
+            if key in ["DPIR1", "DPIR2", "RPIR1", "RPIR2", "RPIR3", "RPIR4"]:
                 pir.run(key, settings[key], devices_threads, stop_event)
-            if key in ["RDHT1", "RDHT2", "RDHT4"]:
+            if key in ["RDHT1", "RDHT2", "RDHT3", "RDHT4", "GDHT"]:
                 dht.run(key, settings[key], devices_threads, stop_event)
             if key in ["DMS"]:
                 dms.run(key, settings[key], devices_threads, stop_event)
