@@ -5,7 +5,12 @@
         "pi": 1,
         "name": "Door Sensor (Button) - Porch"
     },
-
+    "DS2": {
+        "simulated": true,
+        "pins": [27],
+        "pi": 2,
+        "name": "Door Sensor (Button) - Garage"
+    },
     "DL": {
         "simulated": true,
         "pins": [22],
@@ -20,6 +25,13 @@
         "name": "Door Ultrasonic Sensor - Porch"
     },
 
+    "DUS2": {
+        "simulated": true,
+        "pins": [23, 24],
+        "pi": 2,
+        "name": "Door Ultrasonic Sensor - Garage"
+    },
+
     "DB": {
         "simulated": true,
         "pins": [14],
@@ -32,6 +44,13 @@
         "pins": [15],
         "pi": 1,
         "name": "Door Motion Sensor - Porch"
+    },
+
+    "DPIR2": {
+        "simulated": true,
+        "pins": [15],
+        "pi": 2,
+        "name": "Door Motion Sensor - Garage"
     },
 
     "DMS": {
@@ -55,6 +74,13 @@
         "name": "Motion Sensor - Stairs"
     },
 
+    "RPIR3": {
+        "simulated": true,
+        "pins": [10],
+        "pi": 2,
+        "name": "Motion Sensor - Kitchen"
+    },
+
     "RDHT1": {
         "simulated": true,
         "pins": [17],
@@ -67,5 +93,19 @@
         "pins": [11],
         "pi": 1,
         "name": "Temperature And Humidity Sensor - Bedroom 3"
+    },
+
+    "GDHT": {
+        "simulated": true,
+        "pins": [17],
+        "pi": 2,
+        "name": "Temperature And Humidity Sensor - Garage"
+    },
+
+    "RDHT3": {
+        "simulated": true,
+        "pins": [11],
+        "pi": 2,
+        "name": "Temperature And Humidity Sensor - Kitchen"
     }
 }
