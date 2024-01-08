@@ -12,3 +12,4 @@ def simulate(callback, stop_event):
                 break
             callback(str(random.randint(0, 9)))
             time.sleep(1)
+        callback("#")
