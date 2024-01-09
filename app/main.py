@@ -2,7 +2,7 @@ import threading
 
 from colorama import Fore
 
-from components import button, led, uds, buzzer, pir, dht, dms, fourSD, infrared, rgb_light, lcd
+from components import button, led, uds, buzzer, pir, dht, dms, fourSD, infrared, rgb_light, lcd, gsg
 from events.BuzzerPressEvent import BuzzerPressEvent
 from events.BuzzerReleaseEvent import BuzzerReleaseEvent
 from events.DoorLightOffEvent import DoorLightOffEvent
@@ -98,6 +98,8 @@ def main():
                 rgb_light.run(key, settings[key], devices_threads, rgb_off_event, rgb_change_event, stop_event)
             if key in ["GLCD"]:
                 lcd.run(key, settings[key], devices_threads, stop_event, lcd_change_event)
+            if key in ["GSG"]:
+                gsg.run(key, settings[key], devices_threads, stop_event)
 
         while True:
             pass

@@ -40,5 +40,10 @@
         "pins": [25, 24, 23, 17, 21, 22],
         "pi": 2,
         "name": "LCD - Garage"
+    },
+    "GSG": {
+        "simulated": true,
+        "pi": 2,
+        "name": "Gun Safe Gyroscope"
     }
 }
