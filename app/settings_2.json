@@ -34,5 +34,11 @@
         "pins": [11],
         "pi": 2,
         "name": "Temperature And Humidity Sensor - Kitchen"
+    },
+    "GLCD": {
+        "simulated": true,
+        "pins": [25, 24, 23, 17, 21, 22],
+        "pi": 2,
+        "name": "LCD - Garage"
     }
 }
