@@ -1,5 +1,6 @@
 import atexit
 import json
+import threading
 
 from flask import Flask, jsonify
 from flask_mqtt import Mqtt
@@ -28,6 +29,9 @@ influxdb_write_api = influxdb.write_api(write_options=WriteOptions(batch_size=20
 
 mqtt = Mqtt(app)
 atexit.register(on_exit, influxdb, influxdb_write_api, mqtt)
+people_counter = 0
+people_counter_lock = threading.Lock()
+
 
 current_measurements = {}
 devices = []
@@ -54,14 +58,31 @@ def handle_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to broker")
         mqtt.subscribe("measurements")
+        mqtt.subscribe("tracker")
     else:
         print("Failed to connect to broker, return code", rc)
 
 
 @mqtt.on_message()
 def handle_mqtt_message(client, userdata, message):
+    decoded_msg = message.payload.decode('utf-8')
+    if decoded_msg[0] == 'E':
+        global people_counter
+        with people_counter_lock:
+            if decoded_msg == 'ENTER':
+                print("ENTERING")
+                people_counter += 1
+            elif decoded_msg == 'EXIT':
+                print("EXITING")
+                if people_counter > 0:
+                    people_counter -= 1
+                else:
+                    print("INTRUDER LEAVING THROUGH THE WINDOW :O")
+            print("People counter: " + str(people_counter))
+        return
+   
     global pi1_batch_size, pi2_batch_size, pi3_batch_size
-    obj = json.loads(message.payload.decode('utf-8'))
+    obj = json.loads(decoded_msg)
     if obj['deviceType'] == "DHT":
         tokens = obj['value'].split("%")
         humidity = tokens[0]

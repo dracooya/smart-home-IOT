@@ -6,6 +6,10 @@ from simulators.uds import run_uds_simulator
 from value_queue import value_queue
 
 
+last_distance = -1
+second_last_distance = -1
+
+
 def uds_callback(code, settings, distance):
     print_status(code, f'DISTANCE: {distance} cm')
     val = {
@@ -18,6 +22,10 @@ def uds_callback(code, settings, distance):
         "pi": settings["pi"]
     }
     value_queue.put(val)
+    global last_distance
+    global second_last_distance
+    second_last_distance = last_distance
+    last_distance = distance
 
 
 def run_uds(code, settings, threads, stop_event):
