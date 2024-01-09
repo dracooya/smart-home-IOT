@@ -1,0 +1,193 @@
+[
+    {
+        "id":"DS1",
+        "simulated": true,
+        "pins": [27],
+        "pi": 1,
+        "name": "Door Sensor (Button) - Porch"
+    },
+
+    {
+        "id": "DL",
+        "simulated": true,
+        "pins": [22],
+        "pi": 1,
+        "name": "Door Light (LED diode)"
+    },
+
+    {
+        "id": "DUS1",
+        "simulated": true,
+        "pins": [23, 24],   
+        "pi": 1,
+        "name": "Door Ultrasonic Sensor - Porch"
+    },
+
+    {
+        "id": "DB",
+        "simulated": true,
+        "pins": [14],
+        "pi": 1,
+        "name": "Door Buzzer"
+    },
+
+    {
+        "id": "DPIR1",
+        "simulated": true,
+        "pins": [15],
+        "pi": 1,
+        "name": "Door Motion Sensor - Porch"
+    },
+
+    {
+        "id": "DMS",
+        "simulated": true,
+        "pins": [25,8,7,1,12,16,20,21],
+        "pi": 1,
+        "name": "Door Membrane Switch - Foyer"
+    },
+
+    {
+        "id":"RPIR1",
+        "simulated": true,
+        "pins": [10],
+        "pi": 1,
+        "name": "Room Motion Sensor - Foyer"
+    },
+
+    {
+        "id": "RPIR2",
+        "simulated": true,
+        "pins": [9],
+        "pi": 1,
+        "name": "Motion Sensor - Stairs"
+    },
+
+    {
+        "id": "RDHT1",
+        "simulated": true,
+        "pins": [17],
+        "pi": 1,
+        "name": "Temperature And Humidity Sensor - Bedroom 2"
+    },
+
+    {
+        "id": "RDHT2",
+        "simulated": true,
+        "pins": [11],
+        "pi": 1,
+        "name": "Temperature And Humidity Sensor - Bedroom 3"
+    },
+
+    {
+        "id": "DS2",
+        "simulated": true,
+        "pins": [27],
+        "pi": 2,
+        "name": "Door Sensor (Button) - Garage"
+    },
+
+    {
+        "id":"DUS2",
+        "simulated": true,
+        "pins": [23, 24],
+        "pi": 2,
+        "name": "Door Ultrasonic Sensor - Garage"
+    },
+
+    {
+        "id": "DPIR2",
+        "simulated": true,
+        "pins": [15],
+        "pi": 2,
+        "name": "Door Motion Sensor - Garage"
+    },
+
+    {
+        "id": "RPIR3",
+        "simulated": true,
+        "pins": [10],
+        "pi": 2,
+        "name": "Motion Sensor - Kitchen"
+    },
+
+    {
+        "id": "GDHT",
+        "simulated": true,
+        "pins": [17],
+        "pi": 2,
+        "name": "Temperature And Humidity Sensor - Garage"
+    },
+
+    {
+        "id": "RDHT3",
+        "simulated": true,
+        "pins": [11],
+        "pi": 2,
+        "name": "Temperature And Humidity Sensor - Kitchen"
+    },
+
+    {
+        "id": "GLCD",
+        "simulated": true,
+        "pins": [25, 24, 23, 17, 21, 22],
+        "pi": 2,
+        "name": "LCD - Garage"
+    },
+
+    {
+        "id": "GSG",
+        "simulated": true,
+        "pins": [],
+        "pi": 2,
+        "name": "Gun Safe Gyroscope"
+    },
+
+    {
+        "id": "RPIR4",
+        "simulated": true,
+        "pins": [15],
+        "pi": 3,
+        "name": "Door Motion Sensor - Dinette"
+    },
+
+    {
+        "id": "RDHT4",
+        "simulated": true,
+        "pins": [16],
+        "pi": 3,
+        "name": "Temperature And Humidity Sensor - Owner's Suite"
+    },
+
+    {
+        "id": "BB",
+        "simulated": true,
+        "pins": [14],   
+        "pi": 3,
+        "name": "Bedroom Buzzer - Owner's Suite"
+    },
+
+    {
+        "id": "B4SD",
+        "simulated": true,
+        "pins": [11,4,23,8,7,10,18,25,22,27,17,24],
+        "pi": 3,
+        "name": "Bedroom 4 Digit 7 Segment Display - Owner's Suite"
+    },
+
+    {
+        "id": "BIR",
+        "simulated": true,
+        "pins": [26],
+        "pi": 3,
+        "name": "Bedroom Infrared Sensor - Owner's Suite"
+    },
+
+    {
+        "id": "BGRB",
+        "simulated": true,
+        "pins": [12,13,19],
+        "pi": 3,
+        "name": "Bedroom RGB Lights - Owner's Suite"
+    }
+]

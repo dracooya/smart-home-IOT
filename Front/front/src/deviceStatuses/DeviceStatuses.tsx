@@ -1,6 +1,10 @@
 import {DeviceService} from "../services/DeviceService.ts";
-import {Box, Button, Card, CardContent, Grid, ImageList, Tab, Tabs, Typography} from "@mui/material";
-import React from "react";
+import {Box, Button, Card, CardContent, CardMedia, Grid, ImageList, Tab, Tabs, Typography} from "@mui/material";
+import React, {useEffect, useRef} from "react";
+import {Device} from "../models/Device.ts";
+import {DeviceTypeEnum} from "../models/enums/DeviceTypeEnum.ts";
+import SettingsIcon from '@mui/icons-material/Settings';
+import io from 'socket.io-client';
 
 interface DeviceStatusesProps {
     deviceService: DeviceService
@@ -41,12 +45,37 @@ function a11yProps(index: number) {
 
 export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
     const [value, setValue] = React.useState(0);
-    const [devices, setDevices] = React.useState<number[]>([]);
-    const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
-    const openMenu = !!menuAnchorEl;
+    const [devices, setDevices] = React.useState<Device[]>([]);
+    const [devicesStatuses, setDevicesStatuses] = React.useState<Map<string,string>>(new Map<string, string>());
+    const shouldLoad = useRef(true);
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
+
+    useEffect(() => {
+        if(!shouldLoad.current) return;
+        deviceService.getDevices().then( response => {
+            if (response.length > 0) {
+                response.forEach(device => {
+                    devicesStatuses.set(device.id, device.status)
+                })
+                setDevices(response);
+            }
+            setDevices(response);
+            shouldLoad.current = false;
+        }).catch(err => console.log(err));
+
+    }, []);
+
+    useEffect(() => {
+        const socket = io('http://localhost:5000');
+        socket.on('status', (message) => {
+            const summary = JSON.parse(message);
+            const newMap = new Map<string,string>(Object.entries(summary));
+            setDevicesStatuses(newMap);
+        });
+    }, []);
+
     return (
         <>
             <Grid container height={'100%'}>
@@ -58,20 +87,17 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
                         <TabPanel value={value} index={0}>
                             <Grid
                                 item
-                                height={'100%'}
-                                xl={10}
-                                lg={10}
-                                md={10}
+                                xl={12}
+                                lg={12}
+                                md={12}
                                 sm={12}
                                 xs={12}
-                                p={2}
+                                p={0}
                                 style={{
                                     borderRadius: '1.5em',
                                     overflowY: 'auto',
-                                    maxHeight: '100vh',
                                 }}
                                 alignItems={'flex-start'}
-                                ml={{xl: '20%', lg: '20%', md: '25%', sm: '0', xs: '0'}}
                                 mt={{xl: 0, lg: 0, md: 0, sm: '64px', xs: '64px'}}>
                                 <ImageList  sx={{
                                     columnCount: {
@@ -81,7 +107,7 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
                                         lg: '5 !important',
                                         xl: '5 !important',
                                     },
-                                    width: "100%"}} cols={3} rowHeight={164}>
+                                    width: "100%"}} cols={4} rowHeight={164}>
                                     {devices.map((device) => (
                                         <Card sx={{ display: 'flex',
                                             border:'1px solid #D3D3D3',
@@ -93,38 +119,42 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
                                               key={device.id}>
                                             <Box sx={{ display: 'flex', flexDirection: 'column', width:'250px' }}>
                                                 <CardContent sx={{ flex: '1 0 auto' }}>
-                                                    <Typography component="div" variant="h5" mb={1}>
-                                                        {device.name}
+                                                    <Typography  mb={1}>
+                                                        <b>{device.name}</b>
                                                     </Typography>
 
-                                                    <Typography variant="subtitle1" alignItems={'center'} color="text.secondary" component="div">
-                                                        <span style={{display: 'inline-flex'}}> <HomeIcon/> {device.propertyName} </span>
+                                                    <Typography variant="h5" alignItems={'center'} color="text.secondary">
+                                                        <b>{devicesStatuses.get(device.id)}</b>
                                                     </Typography>
-                                                    <Typography variant="subtitle1" alignItems={'center'} color="text.secondary" component="div">
-                                                        <span style={{display: 'inline-flex'}}> <BoltIcon/>  {device.powerSource} </span>
-                                                    </Typography>
-                                                    <Typography variant="subtitle1" alignItems={'center'} color="text.secondary" component="div">
-                                                        <span style={{display: 'inline-flex'}}> <Battery3BarIcon/> {device.energyConsumption} kWh </span>
-                                                    </Typography>
+
                                                 </CardContent>
+                                                {device.type == DeviceTypeEnum.RGB || device.type == DeviceTypeEnum.ALARM ?
                                                 <Box sx={{ display: 'flex', justifyContent:'center', width:'100%', alignItems: 'center', pl: 1, pb: 1 }}>
-                                                    <Button  color={'secondary'} variant={'contained'} sx={{marginRight:'10px'}}>Share</Button>
-                                                    <div>
-                                                        <Button
-                                                            id={"button_" + device.id}
-                                                            aria-controls={openMenu ? 'menu_' + device.id : undefined}
-                                                            aria-haspopup="true"
-                                                            aria-expanded={openMenu ? 'true' : undefined}
-                                                            variant="contained"
-                                                            disableElevation
-                                                            onClick={(evt) => handleMenuClick(evt,device.id)}
-                                                            endIcon={<KeyboardArrowDownIcon />}>
-                                                            More
-                                                        </Button>
-
-                                                    </div>
+                                                    <Button variant="contained" startIcon={<SettingsIcon />}>
+                                                        Settings
+                                                    </Button>
                                                 </Box>
+                                                : null }
                                             </Box>
+                                            <CardMedia
+                                                component="img"
+                                                sx={{ width: 151 }}
+                                                image={device.type == "DHT" ? "../public/dht.png" :
+                                                       device.type == "FOUR_SD" ? "../public/4sd.png" :
+                                                       device.type == "LED" ? "../public/led.png" :
+                                                       device.type == "RGB" ? "../public/rgb.png" :
+                                                       device.type == "PIR" ? "../public/pir.png" :
+                                                       device.type == "GYRO" ? "../public/gyro.png" :
+                                                       device.type == "BUZZER" ? "../public/buzzer.png" :
+                                                       device.type == "ALARM" ? "../public/alarm.png" :
+                                                       device.type == "UDS" ? "../public/uds.png" :
+                                                       device.type == "DMS" ? "../public/keypad.png" :
+                                                       device.type == "DS" ? "../public/door.png" :
+                                                       device.type == "LCD" ? "../public/lcd.png" :
+                                                       device.type == "IR" ? "../public/ir.png" : ""
+                                                }
+                                                alt="Device image"
+                                            />
                                         </Card>
                                     ))}
                                 </ImageList>

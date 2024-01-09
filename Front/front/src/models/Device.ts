@@ -4,6 +4,5 @@ export interface Device {
     type: DeviceTypeEnum,
     id: string,
     name: string,
-    pi: string,
-    status: string
+    status: string,
 }

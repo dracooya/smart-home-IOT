@@ -13,7 +13,8 @@ def motion(code, settings):
         "value": "MOTION",
         "deviceId": code,
         "deviceType": "PIR",
-        "isSimulated": settings["simulated"]
+        "isSimulated": settings["simulated"],
+        "pi": settings["pi"]
     }
     value_queue.put(val)
 
@@ -26,7 +27,8 @@ def no_motion(code, settings):
         "value": "NO-MOTION",
         "deviceId": code,
         "deviceType": "PIR",
-        "isSimulated": settings["simulated"]
+        "isSimulated": settings["simulated"],
+        "pi": settings["pi"]
     }
     value_queue.put(val)
 

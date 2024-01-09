@@ -13,7 +13,8 @@ def button_callback(code, settings):
         "value": "PRESSED",
         "deviceId": code,
         "deviceType": "BUTTON",
-        "isSimulated": settings["simulated"]
+        "isSimulated": settings["simulated"],
+        "pi": settings["pi"]
 
     }
     value_queue.put(val)

@@ -22,7 +22,8 @@ def callback(code, settings, key):
         "value": full_attempt,
         "deviceId": code,
         "deviceType": "DMS",
-        "isSimulated": settings["simulated"]
+        "isSimulated": settings["simulated"],
+        "pi": settings["pi"]
     }
     value_queue.put(val)
     full_attempt = ""

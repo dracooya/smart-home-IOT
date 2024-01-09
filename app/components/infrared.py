@@ -33,7 +33,8 @@ def infrared_callback(status):
         "value": status,
         "deviceId": Code,
         "deviceType": "IR",
-        "isSimulated": Settings["simulated"]
+        "isSimulated": Settings["simulated"],
+        "pi": 3
 
     }
     value_queue.put(val)
