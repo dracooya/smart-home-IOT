@@ -2,12 +2,13 @@ import threading
 
 from colorama import Fore
 
-from components import button, led, uds, buzzer, pir, dht, dms, fourSD, infrared, rgb_light
+from components import button, led, uds, buzzer, pir, dht, dms, fourSD, infrared, rgb_light, lcd, gsg
 from events.BuzzerPressEvent import BuzzerPressEvent
 from events.BuzzerReleaseEvent import BuzzerReleaseEvent
 from events.DoorLightOffEvent import DoorLightOffEvent
 from events.DoorLightOnEvent import DoorLightOnEvent
 from events.RGBChangeEvent import RGBChangeEvent
+from events.LCDChangeEvent import LCDChangeEvent
 from settings import load_settings
 from mqtt_publisher import publisher_task
 import sys
@@ -25,6 +26,8 @@ buzzer_press_event = BuzzerPressEvent()
 buzzer_release_event = BuzzerReleaseEvent()
 
 rgb_change_event = RGBChangeEvent()
+
+lcd_change_event = LCDChangeEvent()
 
 
 def user_input(stop_event):
@@ -64,18 +67,18 @@ def main():
     publisher_thread.start()
     try:
         for key in settings:
-            if key in ["DS1"]:
+            if key in ["DS1", "DS2"]:
                 button.run_button(key, settings[key], devices_threads, stop_event)
             if key in ["DL"]:
                 led.run_led(key, settings[key], devices_threads, door_light_on_event, door_light_off_event, stop_event)
-            if key in ["DUS1"]:
+            if key in ["DUS1", "DUS2"]:
                 uds.run_uds(key, settings[key], devices_threads, stop_event)
             if key in ["DB","BB"]:
                 buzzer.run_buzzer(key, settings[key], devices_threads, buzzer_press_event, buzzer_release_event,
                                   stop_event)
-            if key in ["DPIR1", "RPIR1", "RPIR2", "RPIR4"]:
+            if key in ["DPIR1", "DPIR2", "RPIR1", "RPIR2", "RPIR3", "RPIR4"]:
                 pir.run(key, settings[key], devices_threads, stop_event)
-            if key in ["RDHT1", "RDHT2", "RDHT4"]:
+            if key in ["RDHT1", "RDHT2", "RDHT3", "RDHT4", "GDHT"]:
                 dht.run(key, settings[key], devices_threads, stop_event)
             if key in ["DMS"]:
                 dms.run(key, settings[key], devices_threads, stop_event)
@@ -85,7 +88,11 @@ def main():
                 infrared.run(key, settings[key], devices_threads, stop_event)
             if key in ["BGRB"]:
                 rgb_light.run(key, settings[key], devices_threads, rgb_change_event, stop_event)
-            
+            if key in ["GLCD"]:
+                lcd.run(key, settings[key], devices_threads, stop_event, lcd_change_event)
+            if key in ["GSG"]:
+                gsg.run(key, settings[key], devices_threads, stop_event)
+
         while True:
             pass
 

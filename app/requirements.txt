@@ -1,3 +1,4 @@
 colorama==0.4.6
 paho_mqtt==1.6.1
 playsound==1.2.2
+smbus2~=0.4.3
