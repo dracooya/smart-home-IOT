@@ -14,7 +14,8 @@ def buzzer_callback(code, settings, status):
         "value": status,
         "deviceId": code,
         "deviceType": "BUZZER",
-        "isSimulated": settings["simulated"]
+        "isSimulated": settings["simulated"],
+        "pi": settings["pi"]
 
     }
     value_queue.put(val)

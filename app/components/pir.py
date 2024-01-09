@@ -17,9 +17,11 @@ def motion(code, settings):
         "value": "MOTION",
         "deviceId": code,
         "deviceType": "PIR",
-        "isSimulated": settings["simulated"]
+        "isSimulated": settings["simulated"],
+        "pi": settings["pi"]
     }
     value_queue.put(val)
+
     if code == "DPIR1":
         publish.single("DL", "ON", hostname=HOSTNAME, port=PORT)
     if code[0] == "D":
@@ -32,6 +34,19 @@ def motion(code, settings):
             print_status(code, "Distance is increasing, someone is leaving")
             publish.single("tracker", "EXIT", hostname=HOSTNAME, port=PORT)
 
+
+def no_motion(code, settings):
+    print_status(code, "NO MOTION")
+    val = {
+        "measurementName": "PIRStatus",
+        "timestamp": round(time.time()*1000),
+        "value": "NO-MOTION",
+        "deviceId": code,
+        "deviceType": "PIR",
+        "isSimulated": settings["simulated"],
+        "pi": settings["pi"]
+    }
+    value_queue.put(val)
 
 def run(code, settings, threads, stop_event):
     if settings['simulated']:

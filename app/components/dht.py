@@ -7,25 +7,17 @@ from value_queue import value_queue
 
 def callback(code, settings, humidity, temperature):
     print_status(code, f"Humidity: {humidity:.2f}, Temperature: {temperature:.2f}")
-    val_hum = {
-        "measurementName": "humidity",
+    val = {
+        "measurementName": "hum&temp",
         "timestamp": round(time.time()*1000),
-        "value": humidity,
+        "value": str(round(humidity,2)) + "%, " + str(round(temperature,2)) + "°C",
         "deviceId": code,
         "deviceType": "DHT",
-        "isSimulated": settings["simulated"]
+        "isSimulated": settings["simulated"],
+        "pi": settings["pi"]
     }
 
-    val_temp = {
-        "measurementName": "temperature",
-        "timestamp": round(time.time()*1000),
-        "value": temperature,
-        "deviceId": code,
-        "deviceType": "DHT",
-        "isSimulated": settings["simulated"]
-    }
-    value_queue.put(val_hum)
-    value_queue.put(val_temp)
+    value_queue.put(val)
 
 
 def run(code, settings, threads, stop_event):

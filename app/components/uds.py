@@ -18,7 +18,8 @@ def uds_callback(code, settings, distance):
         "value": distance,
         "deviceId": code,
         "deviceType": "UDS",
-        "isSimulated": settings["simulated"]
+        "isSimulated": settings["simulated"],
+        "pi": settings["pi"]
     }
     value_queue.put(val)
     global last_distance

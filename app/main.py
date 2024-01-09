@@ -7,7 +7,6 @@ from events.BuzzerPressEvent import BuzzerPressEvent
 from events.BuzzerReleaseEvent import BuzzerReleaseEvent
 from events.DoorLightOffEvent import DoorLightOffEvent
 from events.DoorLightOnEvent import DoorLightOnEvent
-from events.RGBOffEvent import RGBOffEvent
 from events.RGBChangeEvent import RGBChangeEvent
 from events.LCDChangeEvent import LCDChangeEvent
 from settings import load_settings
@@ -26,7 +25,6 @@ door_light_off_event = DoorLightOffEvent()
 buzzer_press_event = BuzzerPressEvent()
 buzzer_release_event = BuzzerReleaseEvent()
 
-rgb_off_event = RGBOffEvent()
 rgb_change_event = RGBChangeEvent()
 
 lcd_change_event = LCDChangeEvent()
@@ -43,10 +41,6 @@ def user_input(stop_event):
             buzzer_press_event.trigger()
         elif some_input == "p" or some_input == "P":
             buzzer_release_event.trigger()
-        elif some_input == "q" or some_input == "Q":
-            rgb_off_event.trigger()
-        elif some_input == "w" or some_input == "W":
-            rgb_change_event.trigger("1")
         else:
             pass
 
@@ -66,8 +60,6 @@ def main():
     print(Fore.LIGHTCYAN_EX + " z/Z turns off the door light.")
     print(Fore.LIGHTCYAN_EX + " o/O turns on the door buzzer.")
     print(Fore.LIGHTCYAN_EX + " p/P turns off the door buzzer.")
-    print(Fore.LIGHTCYAN_EX + " q/Q turns off the bedroom RGB light.")
-    print(Fore.LIGHTCYAN_EX + " w/W turns on the bedroom RGB light.")
     print(Fore.MAGENTA + "----------------------------------------------------------------------")
     t2 = threading.Thread(target=user_input, args=(stop_event,), daemon=True)
     t2.start()
@@ -95,7 +87,7 @@ def main():
             if key in ["BIR"]:
                 infrared.run(key, settings[key], devices_threads, stop_event)
             if key in ["BGRB"]:
-                rgb_light.run(key, settings[key], devices_threads, rgb_off_event, rgb_change_event, stop_event)
+                rgb_light.run(key, settings[key], devices_threads, rgb_change_event, stop_event)
             if key in ["GLCD"]:
                 lcd.run(key, settings[key], devices_threads, stop_event, lcd_change_event)
             if key in ["GSG"]:

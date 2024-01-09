@@ -13,7 +13,8 @@ def callback(code, settings, message):
         "value": message,
         "deviceId": code,
         "deviceType": "LCD",
-        "isSimulated": settings["simulated"]
+        "isSimulated": settings["simulated"],
+        "pi": settings["pi"]
     }
     value_queue.put(val)
 
