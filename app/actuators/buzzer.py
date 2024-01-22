@@ -4,7 +4,7 @@ import time
 
 should_buzz = False
 
-def buzzer_register(pin, pitch, callback_fc, door_buzzer_press_event, door_buzzer_release_event, stop_event):
+def buzzer_register(pin, pitch, callback_fc, door_buzzer_press_event, door_buzzer_release_event, alarm_buzz_start_event, alarm_buzz_stop_event, stop_event):
     global should_buzz
     GPIO.setup(pin, GPIO.OUT)
     #Buzz = GPIO.PWM(pin, 440)
@@ -33,6 +33,22 @@ def buzzer_register(pin, pitch, callback_fc, door_buzzer_press_event, door_buzze
     def buzzer_off() :
         global should_buzz
         callback_fc("RELEASED")
+        #Buzz.stop()
+        should_buzz = False
+        buzz_stop_event.set()
+
+    @alarm_buzz_start_event.on
+    def alarm_buzzer_start() :
+        global should_buzz
+        callback_fc("ALARM ON")
+        #Buzz.ChangeFrequency(pitch)
+        #Buzz.start(100)
+        should_buzz = True
+        
+    @alarm_buzz_stop_event.on
+    def alarm_buzzer_stop() :
+        global should_buzz
+        callback_fc("ALARM OFF")
         #Buzz.stop()
         should_buzz = False
         buzz_stop_event.set()

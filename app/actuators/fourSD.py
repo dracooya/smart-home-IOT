@@ -13,7 +13,20 @@ num = {' ':(0,0,0,0,0,0,0),
     '8':(1,1,1,1,1,1,1),
     '9':(1,1,1,1,0,1,1)}
  
-def fourSD_register(pins, stop_event):
+def fourSD_register(pins, callback_fc, alarm_buzz_start_event, alarm_buzz_stop_event, stop_event):
+
+    sleep_duration = 0.001
+    slept_for = 0
+    @alarm_buzz_start_event.on
+    def alarm_flicker_on() :
+        global sleep_duration
+        sleep_duration = 0.5
+        
+    @alarm_buzz_stop_event.on
+    def alarm_flicker_off() :
+       global sleep_duration
+       sleep_duration = 0.001
+
     GPIO.setmode(GPIO.BCM)
     segments = pins[0:8]
     for segment in segments:
@@ -37,8 +50,12 @@ def fourSD_register(pins, stop_event):
                     else:
                         GPIO.output(25, 0)
                 GPIO.output(digits[digit], 0)
-                time.sleep(0.001)
+                time.sleep(sleep_duration)
+                slept_for += sleep_duration
                 GPIO.output(digits[digit], 1)
+                if(slept_for >= 10):
+                    slept_for = 0
+                    callback_fc("Current time: " + time.strftime("%H:%M", time.localtime()))
             if stop_event.is_set():
                 break
     finally:
