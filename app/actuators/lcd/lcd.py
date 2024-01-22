@@ -1,15 +1,29 @@
 #!/usr/bin/env python3
 
-from time import sleep
-
 from Adafruit_LCD1602 import Adafruit_CharLCD
 from PCF8574 import PCF8574_GPIO
-
+from broker_config.broker_settings import HOSTNAME, PORT
+from helpers.printer import print_status
 
 to_display = "Hello World!"
 
 
-def register(pins, callback, change_display_event):
+def register(code, pins, callback):
+    import paho.mqtt.client as mqtt
+
+    def on_connect(client, userdata, flags, rc):
+        print_status(code, "Connected to MQTT broker with result code " + str(rc))
+        client.subscribe("GDHT")
+
+    def on_message(client, userdata, msg):
+        change_display(msg.payload.decode())
+
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_message = on_message
+
+    client.connect(HOSTNAME, PORT)
+
     PCF8574_address = 0x27  # I2C address of the PCF8574 chip.
     PCF8574A_address = 0x3F  # I2C address of the PCF8574A chip.
     mcp = None
@@ -35,7 +49,8 @@ def register(pins, callback, change_display_event):
     except KeyboardInterrupt:
         lcd.clear()
 
-    @change_display_event
+    client.loop_start()
+
     def change_display(new_display):
         global to_display
         to_display = new_display

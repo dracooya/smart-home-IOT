@@ -1,22 +1,27 @@
 import time
-import random
+
+from broker_config.broker_settings import HOSTNAME, PORT
+from helpers.printer import print_status
 
 
-to_display = "Temp: 0.00C Hum: 0.00%"
+def simulate(code, callback, stop_event):
+    import paho.mqtt.client as mqtt
 
+    def on_connect(client, userdata, flags, rc):
+        print_status(code, "Connected to MQTT broker with result code " + str(rc))
+        client.subscribe("GDHT")
 
-def simulate(callback, stop_event, change_display_event):
+    def on_message(client, userdata, msg):
+        callback(msg.payload.decode())
+
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_message = on_message
+
+    client.connect(HOSTNAME, PORT)
+
+    client.loop_start()
     while True:
         if stop_event.is_set():
             break
-        humidity = random.uniform(40, 70)
-        temperature = random.uniform(20, 30)
-        to_display = "Temp: {0:.2f}C Hum: {1:.2f}%".format(temperature, humidity)
-        callback(to_display)
-        time.sleep(random.randint(2, 20))
-
-    @change_display_event
-    def change_display(new_display):
-        global to_display
-        to_display = new_display
-        callback(to_display)
+        time.sleep(0.5)

@@ -139,19 +139,19 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
                                             <CardMedia
                                                 component="img"
                                                 sx={{ width: 151 }}
-                                                image={device.type == "DHT" ? "../public/dht.png" :
-                                                       device.type == "FOUR_SD" ? "../public/4sd.png" :
-                                                       device.type == "LED" ? "../public/led.png" :
-                                                       device.type == "RGB" ? "../public/rgb.png" :
-                                                       device.type == "PIR" ? "../public/pir.png" :
-                                                       device.type == "GYRO" ? "../public/gyro.png" :
-                                                       device.type == "BUZZER" ? "../public/buzzer.png" :
-                                                       device.type == "ALARM" ? "../public/alarm.png" :
-                                                       device.type == "UDS" ? "../public/uds.png" :
-                                                       device.type == "DMS" ? "../public/keypad.png" :
-                                                       device.type == "DS" ? "../public/door.png" :
-                                                       device.type == "LCD" ? "../public/lcd.png" :
-                                                       device.type == "IR" ? "../public/ir.png" : ""
+                                                image={device.type == "DHT" ? "../dht.png" :
+                                                       device.type == "FOUR_SD" ? "../4sd.png" :
+                                                       device.type == "LED" ? "../led.png" :
+                                                       device.type == "RGB" ? "../rgb.png" :
+                                                       device.type == "PIR" ? "../pir.png" :
+                                                       device.type == "GYRO" ? "../gyro.png" :
+                                                       device.type == "BUZZER" ? "../buzzer.png" :
+                                                       device.type == "ALARM" ? "../alarm.png" :
+                                                       device.type == "UDS" ? "../uds.png" :
+                                                       device.type == "DMS" ? "../keypad.png" :
+                                                       device.type == "DS" ? "../door.png" :
+                                                       device.type == "LCD" ? "../lcd.png" :
+                                                       device.type == "IR" ? "../ir.png" : ""
                                                 }
                                                 alt="Device image"
                                             />

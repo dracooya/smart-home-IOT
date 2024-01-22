@@ -19,16 +19,14 @@ def callback(code, settings, message):
     value_queue.put(val)
 
 
-def run(code, settings, threads, stop_event, lcd_change_event):
+def run(code, settings, threads, stop_event):
     if settings['simulated']:
         from simulators.lcd import simulate
-        thread = threading.Thread(target=simulate, args=(lambda val: callback(code, settings, val), stop_event,
-                                                         lcd_change_event))
+        thread = threading.Thread(target=simulate, args=(code, lambda val: callback(code, settings, val), stop_event))
         thread.start()
         threads.append(thread)
     else:
         from actuators.lcd.lcd import register
-        thread = threading.Thread(target=register, args=(settings["pins"], lambda val: callback(code, settings, val),
-                                                         lcd_change_event))
+        thread = threading.Thread(target=register, args=(code, settings["pins"], lambda val: callback(code, settings, val)))
         thread.start()
         threads.append(thread)
