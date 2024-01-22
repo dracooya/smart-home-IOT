@@ -1,13 +1,13 @@
 import threading
 
-from playsound import playsound
+#from playsound import playsound
 
 stop_event_audio = threading.Event()
 
 
 def sound_play(stop_event_audio):
     while True:
-        playsound("./sounds/buzzer.mp3")
+        #playsound("./sounds/buzzer.mp3")
         if stop_event_audio.is_set():
             break
 

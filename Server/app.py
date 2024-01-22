@@ -112,23 +112,30 @@ def handle_mqtt_message(client, userdata, message):
     current_measurements[obj["deviceId"]] = obj['value']
 
     if(obj['pi'] == 1):
-        if pi1_batch_size == 49:
+        if pi1_batch_size == 19:
             pi1_batch_size = 0
             send_status_summary()
         else:
             pi1_batch_size += 1
     elif(obj['pi'] == 2):
-        if pi2_batch_size == 49:
+        if pi2_batch_size == 19:
             pi2_batch_size = 0
             send_status_summary()
         else:
             pi2_batch_size += 1
     else:
-        if pi3_batch_size == 49:
+        if pi3_batch_size == 19:
             pi3_batch_size = 0
             send_status_summary()
         else:
             pi3_batch_size += 1
+
+@socketio_app.on('rgb_remote')
+def handle_message(message):
+    command = {
+        "value": message
+    }
+    mqtt.publish("rgb_remote_web", json.dumps(command))
     
 
 @app.route('/')
@@ -160,7 +167,7 @@ def get_all_devices():
         if key in ["B4SD"]:
             device_type = "FOUR_SD"
         if key in ["BIR"]:
-            device_type = "IR"
+            continue
         if key in ["BGRB"]:
             device_type = "RGB"
         if key in ["GLCD"]:

@@ -5,6 +5,7 @@ import {Device} from "../models/Device.ts";
 import {DeviceTypeEnum} from "../models/enums/DeviceTypeEnum.ts";
 import SettingsIcon from '@mui/icons-material/Settings';
 import io from 'socket.io-client';
+import {RGBRemote} from "../RGBRemote/RGBRemote.tsx";
 
 interface DeviceStatusesProps {
     deviceService: DeviceService
@@ -48,9 +49,15 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
     const [devices, setDevices] = React.useState<Device[]>([]);
     const [devicesStatuses, setDevicesStatuses] = React.useState<Map<string,string>>(new Map<string, string>());
     const shouldLoad = useRef(true);
+    const [rgbRemoteOpen, setRgbRemoteOpen] = React.useState<boolean>(false);
+    const socket = io('http://localhost:5000');
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
+
+    const handleRgbRemoteOpen = () => {
+        setRgbRemoteOpen(false);
+    }
 
     useEffect(() => {
         if(!shouldLoad.current) return;
@@ -68,13 +75,13 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:5000');
         socket.on('status', (message) => {
             const summary = JSON.parse(message);
             const newMap = new Map<string,string>(Object.entries(summary));
             setDevicesStatuses(newMap);
         });
     }, []);
+
 
     return (
         <>
@@ -130,7 +137,10 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
                                                 </CardContent>
                                                 {device.type == DeviceTypeEnum.RGB || device.type == DeviceTypeEnum.ALARM ?
                                                 <Box sx={{ display: 'flex', justifyContent:'center', width:'100%', alignItems: 'center', pl: 1, pb: 1 }}>
-                                                    <Button variant="contained" startIcon={<SettingsIcon />}>
+                                                    <Button variant="contained" startIcon={<SettingsIcon />}
+                                                        onClick={() => {
+                                                            device.type == DeviceTypeEnum.RGB ? setRgbRemoteOpen(true) : null;
+                                                        }}>
                                                         Settings
                                                     </Button>
                                                 </Box>
@@ -164,6 +174,7 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
 
                         </TabPanel>
                 </Grid>
+                <RGBRemote open={rgbRemoteOpen} handleClose={handleRgbRemoteOpen} socket={socket}></RGBRemote>
             </Grid>
         </>
     );
