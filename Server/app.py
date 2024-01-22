@@ -178,7 +178,6 @@ def get_all_devices():
     return jsonify(devices_and_statuses)
 
 
-
 if __name__ == '__main__':
     load_devices()
     socketio_app.run(app, debug=False)
