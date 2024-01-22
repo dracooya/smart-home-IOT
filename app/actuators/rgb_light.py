@@ -92,6 +92,8 @@ def rgb_register(pins, callback_fc, rgb_change_event, stop_event, client):
             if current_status != "OFF":
                 current_status = "OFF"
                 last_mode = turnOff
+            else:
+                last_mode = white
         elif(key == "0"):
             last_mode = white
             current_status = "WHITE"

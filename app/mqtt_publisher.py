@@ -9,7 +9,7 @@ def publisher_task(stop_event):
     batch = []
     while True:        
         if value_queue.qsize() >= BATCH_SIZE:
-            for i in range(0,50):
+            for i in range(0,BATCH_SIZE):
                 val = value_queue.get()
                 batch.append(("measurements",json.dumps(val),0,True))
             publish.multiple(batch, hostname=HOSTNAME, port=PORT)

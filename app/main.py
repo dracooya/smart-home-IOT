@@ -8,6 +8,8 @@ from events.BuzzerReleaseEvent import BuzzerReleaseEvent
 from events.DoorLightOffEvent import DoorLightOffEvent
 from events.DoorLightOnEvent import DoorLightOnEvent
 from events.RGBChangeEvent import RGBChangeEvent
+from events.AlarmClockOnEvent import AlarmClockOnEvent
+from events.AlarmClockOffEvent import AlarmClockOffEvent
 from settings import load_settings
 from mqtt_publisher import publisher_task
 import sys
@@ -25,6 +27,9 @@ buzzer_press_event = BuzzerPressEvent()
 buzzer_release_event = BuzzerReleaseEvent()
 
 rgb_change_event = RGBChangeEvent()
+
+alarm_clock_on_event = AlarmClockOnEvent()
+alarm_clock_off_event = AlarmClockOffEvent()
 
 
 def user_input(stop_event):
@@ -72,6 +77,7 @@ def main():
                 uds.run_uds(key, settings[key], devices_threads, stop_event)
             if key in ["DB","BB"]:
                 buzzer.run_buzzer(key, settings[key], devices_threads, buzzer_press_event, buzzer_release_event,
+                                  alarm_clock_on_event, alarm_clock_off_event,
                                   stop_event)
             if key in ["DPIR1", "DPIR2", "RPIR1", "RPIR2", "RPIR3", "RPIR4"]:
                 pir.run(key, settings[key], devices_threads, stop_event)
@@ -80,7 +86,7 @@ def main():
             if key in ["DMS"]:
                 dms.run(key, settings[key], devices_threads, stop_event)
             if key in ["B4SD"]:
-                fourSD.run(key, settings[key], devices_threads, stop_event)
+                fourSD.run(key, settings[key], devices_threads, alarm_clock_on_event, alarm_clock_off_event, stop_event)
             if key in ["BIR"]:
                 infrared.run(key, settings[key], devices_threads, stop_event)
             if key in ["BGRB"]:

@@ -27,6 +27,6 @@ def run(code, settings, threads, stop_event):
         threads.append(thread)
     else:
         from sensors.gsg.gsg import register
-        thread = threading.Thread(target=register, args=(lambda key: callback(code, settings, key), ))
+        thread = threading.Thread(target=register, args=(lambda key: callback(code, settings, key), stop_event))
         thread.start()
         threads.append(thread)

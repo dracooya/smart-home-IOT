@@ -51,21 +51,21 @@ import ctypes
 import time
 import smbus
 import csv
-from MPUConstants import MPUConstants as C
-from Quaternion import Quaternion as Q
-from Quaternion import XYZVector as V
+from sensors.gsg.MPUConstants import MPUConstants as C
+from sensors.gsg.Quaternion import Quaternion as Q
+from sensors.gsg.Quaternion import XYZVector as V
 
 
 class MPU6050:
     __buffer = [0] * 14
-    __debug = False
+    __debug = True
     __DMP_packet_size = 0
     __dev_id = 0
     __bus = None
 
     def __init__(self, a_bus=1, a_address=C.MPU6050_DEFAULT_ADDRESS,
                  a_xAOff=None, a_yAOff=None, a_zAOff=None, a_xGOff=None,
-                 a_yGOff=None, a_zGOff=None, a_debug=False):
+                 a_yGOff=None, a_zGOff=None, a_debug=True):
         self.__dev_id = a_address
         # Connect to num 1 SMBus
         self.__bus = smbus.SMBus(a_bus)
@@ -382,12 +382,18 @@ class MPU6050:
                        C.MPU6050_USERCTRL_DMP_RESET_BIT, True)
 
     def dmp_initialize(self):
+        print("pre reseta")
         # Reset the MPU
         self.reset()
+        print("posle reseta")
         # time.Sleep a bit while resetting
+        print("pre sleepa")
         time.sleep(50 / 1000)
+        print("posle sleepa")
         # Disable time.sleep mode
+        print("pre mode")
         self.set_sleep_enabled(0)
+        print("posle mod")
 
         # get MPU hardware revision
         if self.__debug:
@@ -807,13 +813,13 @@ class MPU6050:
     def DMP_get_linear_accel_int16(self, a_v_raw, a_grav):
         x = ctypes.c_int16(a_v_raw.x - (a_grav.x*8192)).value
         y = ctypes.c_int16(a_v_raw.y - (a_grav.y*8192)).value
-        y = ctypes.c_int16(a_v_raw.y - (a_grav.y*8192)).value
+        z = ctypes.c_int16(a_v_raw.y - (a_grav.z*8192)).value
         return V(x, y, z)
 
     def DMP_get_euler(self, a_quat):
         psi = math.atan2(2*a_quat.x*a_quat.y - 2*a_quat.w*a_quat.z,
                          2*a_quat.w*a_quat.w + 2*a_quat.x*a_quat.x - 1)
-        theta = -asin(2*a_quat.x*a_quat.z + 2*a_quat.w*a_quat.y)
+        theta = -math.asin(2*a_quat.x*a_quat.z + 2*a_quat.w*a_quat.y)
         phi = math.atan2(2*a_quat.y*a_quat.z - 2*a_quat.w*a_quat.x,
                          2*a_quat.w*a_quat.w + 2*a_quat.z*a_quat.z - 1)
         return V(psi, theta, phi)
@@ -856,7 +862,7 @@ class MPU6050IRQHandler:
     __log_file = None
     __csv_writer = None
     __start_time = None
-    __debug = None
+    __debug = True
 
     # def __init__(self, a_i2c_bus, a_device_address, a_x_accel_offset,
     #             a_y_accel_offset, a_z_accel_offset, a_x_gyro_offset,
@@ -866,7 +872,7 @@ class MPU6050IRQHandler:
     #                         a_x_gyro_offset, a_y_gyro_offset, a_z_gyro_offset,
     #                         a_enable_debug_output)
     def __init__(self, a_mpu, a_logging=False, a_log_file='log.csv',
-                 a_debug=False):
+                 a_debug=True):
         self.__mpu = a_mpu
         self.__FIFO_buffer = [0]*64
         self.__mpu.dmp_initialize()

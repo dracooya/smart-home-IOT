@@ -6,7 +6,9 @@ def run_rgb_simulator(callback_fc, rgb_change_event, stop_event,client):
         global current_status, last_mode
         if(key == "OK"):
             if current_status != "OFF":
-                current_status = "OFF"
+                last_mode = "OFF"
+            else:
+                last_mode = "WHITE"
         elif(key == "0"):
             last_mode = "WHITE"
         elif(key == "1"):
