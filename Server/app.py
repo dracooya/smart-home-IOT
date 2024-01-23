@@ -1,6 +1,8 @@
 import atexit
 import json
+import sched
 import threading
+import time
 
 from flask import Flask, jsonify
 from flask_mqtt import Mqtt
@@ -48,6 +50,7 @@ alarm_state = AlarmState.OFF
 alarm_state_lock = threading.Lock()
 pin = '1234'
 
+
 def set_alarm_state(state: AlarmState):
     global alarm_state
     with alarm_state_lock:
@@ -91,6 +94,7 @@ def handle_connect(client, userdata, flags, rc):
         print("Connected to broker")
         mqtt.subscribe("measurements")
         mqtt.subscribe("tracker")
+        mqtt.subscribe("DMS")
     else:
         print("Failed to connect to broker, return code", rc)
 
@@ -111,6 +115,24 @@ def handle_mqtt_message(client, userdata, message):
                 else:
                     print("INTRUDER LEAVING THROUGH THE WINDOW :O")
             print("People counter: " + str(people_counter))
+        return
+
+    def activate_alarm():
+        set_alarm_state(AlarmState.ON)
+        print("Alarm activated")
+
+    if message.topic == "DMS":
+        if decoded_msg == pin:
+            print("PIN CORRECT")
+            if get_alarm_state() == AlarmState.TRIGGERED or get_alarm_state() == AlarmState.ON:
+                set_alarm_state(AlarmState.OFF)
+                print("Alarm deactivated")
+            elif get_alarm_state() == AlarmState.OFF:
+                scheduler = sched.scheduler(time.time, time.sleep)
+                scheduler.enter(10, 1, activate_alarm)
+                scheduler.run()
+        else:
+            print("PIN INCORRECT")
         return
 
     global pi1_batch_size, pi2_batch_size, pi3_batch_size

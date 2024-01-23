@@ -1,8 +1,11 @@
 import threading
 import time
 
+from broker_config.broker_settings import HOSTNAME, PORT
 from helpers.printer import print_status
 from value_queue import value_queue
+
+import paho.mqtt.publish as publish
 
 
 full_attempt = ""
@@ -26,6 +29,8 @@ def callback(code, settings, key):
         "pi": settings["pi"]
     }
     value_queue.put(val)
+    # SEND TO SERVER PIN ATTEMPT
+    publish.single("DMS", full_attempt, hostname=HOSTNAME, port=PORT)
     full_attempt = ""
 
 
