@@ -1,16 +1,17 @@
 import time
 
 attempt = ""
+send = False
 
 
 def simulate(callback, stop_event):
     global attempt
-    prev_attempt = ""
     while True:
         if stop_event.is_set():
             break
-        if attempt != prev_attempt:
+        global send
+        if send:
             for letter in attempt:
                 callback(letter)
-            prev_attempt = attempt
+            send = False
         time.sleep(1)

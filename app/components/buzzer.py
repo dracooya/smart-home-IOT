@@ -9,16 +9,27 @@ from broker_config.broker_settings import HOSTNAME,PORT
 
 alarm_clock_buzz_event = None
 alarm_clock_stop_event = None
+this_code = ""
+
 
 def on_connect(client, userdata, flags, rc):
     client.subscribe("alarm_clock_buzz")
+    client.subscribe("DB")
+    client.subscribe("BB")
+
 
 def on_message(client, userdata, msg):
     status = msg.payload.decode('utf-8')
-    if status == "START":
-        alarm_clock_buzz_event.trigger()
-    else:
-        alarm_clock_stop_event.trigger()
+    if this_code == "BB" and (msg.topic == "alarm_clock_buzz" or msg.topic == "BB"):
+        if status == "START":
+            alarm_clock_buzz_event.trigger()
+        else:
+            alarm_clock_stop_event.trigger()
+    elif this_code == "DB" and msg.topic == "DB":
+        if status == "START":
+            alarm_clock_buzz_event.trigger()
+        else:
+            alarm_clock_stop_event.trigger()
 
 
 def buzzer_callback(code, settings, status):
@@ -40,12 +51,15 @@ def run_buzzer(code, settings, threads, buzzer_press_event, buzzer_release_event
     global alarm_clock_buzz_event, alarm_clock_stop_event
     alarm_clock_buzz_event = alarm_clock_on_event
     alarm_clock_stop_event = alarm_clock_off_event
-    if code == "BB":
-        client = mqtt.Client()
-        client.on_connect = on_connect
-        client.on_message = on_message
-        client.connect(HOSTNAME, PORT)
-        client.loop_start()
+
+    global this_code
+    this_code = code
+
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(HOSTNAME, PORT)
+    client.loop_start()
     if settings['simulated']:
         buzzer_thread = threading.Thread(target=run_buzzer_simulator,
                                          args=(lambda status: buzzer_callback(code, settings, status),
