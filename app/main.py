@@ -10,12 +10,14 @@ from events.DoorLightOnEvent import DoorLightOnEvent
 from events.RGBChangeEvent import RGBChangeEvent
 from events.AlarmClockOnEvent import AlarmClockOnEvent
 from events.AlarmClockOffEvent import AlarmClockOffEvent
+import simulators.dms
 from settings import load_settings
 from mqtt_publisher import publisher_task
 import sys
 
 try:
     import RPi.GPIO as GPIO
+
     GPIO.setmode(GPIO.BCM)
 except:
     pass
@@ -32,6 +34,16 @@ alarm_clock_on_event = AlarmClockOnEvent()
 alarm_clock_off_event = AlarmClockOffEvent()
 
 
+def invalid_input(some_input):
+    if len(some_input) != 5:
+        return True
+    if some_input[-1] != "#":
+        return True
+    if not some_input[:-1].isdigit():
+        return True
+    return False
+
+
 def user_input(stop_event):
     while True:
         some_input = input('\n')
@@ -43,6 +55,11 @@ def user_input(stop_event):
             buzzer_press_event.trigger()
         elif some_input == "p" or some_input == "P":
             buzzer_release_event.trigger()
+        elif '1' in sys.argv[1] and some_input[-1] == "#":  # check that it's pi 1 and that the input is valid
+            if invalid_input(some_input):
+                print(Fore.RED + "Invalid input! Enter a 4-digit pin code ending with #.")
+                continue
+            simulators.dms.attempt = some_input
         else:
             pass
 
@@ -75,7 +92,7 @@ def main():
                 led.run_led(key, settings[key], devices_threads, door_light_on_event, door_light_off_event, stop_event)
             if key in ["DUS1", "DUS2"]:
                 uds.run_uds(key, settings[key], devices_threads, stop_event)
-            if key in ["DB","BB"]:
+            if key in ["DB", "BB"]:
                 buzzer.run_buzzer(key, settings[key], devices_threads, buzzer_press_event, buzzer_release_event,
                                   alarm_clock_on_event, alarm_clock_off_event,
                                   stop_event)
