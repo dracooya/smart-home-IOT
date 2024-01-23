@@ -13,6 +13,8 @@ from flask_socketio import SocketIO
 from flask_apscheduler import APScheduler
 
 from config import settings
+import sched
+import time
 
 
 def on_exit(db: InfluxDBClient, write_api: WriteApi, mqtt: Mqtt):
@@ -57,7 +59,7 @@ last_alarm_clock = ""
 does_alarm_clock_work = False
 
 last_alarm_reason = ""
-does_alarm_work = False
+does_alarm_work = None
 
 def set_alarm_clock_action():
     global last_alarm_clock, does_alarm_clock_work
@@ -91,18 +93,54 @@ def handle_connect(client, userdata, flags, rc):
         mqtt.subscribe("measurements")
         mqtt.subscribe("tracker")
         mqtt.subscribe("alarm")
+        mqtt.subscribe("DMS")
     else:
         print("Failed to connect to broker, return code", rc)
 
 
 def send_people_counter():
-    mqtt.publish("people_counter",str(people_counter))
+    mqtt.publish("people_counter", str(people_counter))
+
+
+def activate_alarm():
+    global does_alarm_work
+    does_alarm_work = False
+    print("Alarm activated")
+
+
+def deactivate_alarm():
+    global does_alarm_work
+    does_alarm_work = None
+    print("Alarm deactivated")
+
+
+def alarm_on():
+    global does_alarm_work
+    return does_alarm_work is True or does_alarm_work is False
+
+
+def alarm_off():
+    global does_alarm_work
+    return does_alarm_work is None
 
 
 @mqtt.on_message()
 def handle_mqtt_message(client, userdata, message):
     with mqtt_scheduler_lock:
         decoded_msg = message.payload.decode('utf-8')
+        if message.topic == "DMS":
+            if decoded_msg == super_secret_alarm_password:
+                print("PIN CORRECT")
+                if alarm_off():
+                    scheduler = sched.scheduler(time.time, time.sleep)
+                    scheduler.enter(10, 1, activate_alarm)
+                    scheduler.run()
+                elif alarm_on():
+                    deactivate_alarm()
+            else:
+                print("PIN INCORRECT")
+            return
+
         if decoded_msg[0] == 'E':
             global people_counter
             with people_counter_lock:
@@ -120,8 +158,8 @@ def handle_mqtt_message(client, userdata, message):
             return
 
         if "ALARM_ON_RPIR_MOTION" in decoded_msg:
-            global does_alarm_work,last_alarm_reason
-            if does_alarm_work:
+            global does_alarm_work, last_alarm_reason
+            if does_alarm_work is True:
                 return
             print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
             last_alarm_reason = "Room motion detected when no one's home (" + decoded_msg.split("_")[-1] + ")"
@@ -284,6 +322,7 @@ def get_alarm_status():
     }
     return jsonify(alarm_status)
 
+
 @app.route('/alarm_disable', methods=['PUT'])
 def disable_alarm():
     global does_alarm_work
@@ -292,7 +331,7 @@ def disable_alarm():
         password = data.get("password")
         if(password != super_secret_alarm_password):
             raise Exception
-        does_alarm_work = False
+        does_alarm_work = None
 
         return jsonify({'message': 'Alarm disabled'})
     
