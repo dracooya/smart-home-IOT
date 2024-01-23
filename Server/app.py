@@ -127,6 +127,9 @@ def deactivate_alarm():
     mqtt.publish("DB", "STOP")
     mqtt.publish("BB", "STOP")
 
+    point_alarm = Point('alarm').field('_measurement', 'DEACTIVATED').time(datetime.datetime.utcnow(), WritePrecision.NS)
+    influxdb_write_api.write(bucket='smart_measurements', record=point_alarm)
+
 
 def trigger_alarm():
     global does_alarm_work
@@ -134,6 +137,9 @@ def trigger_alarm():
     print("Alarm triggered")
     mqtt.publish("DB", "START")
     mqtt.publish("BB", "START")
+
+    point_alarm = Point('alarm').field('_measurement', 'TRIGGERED').time(datetime.datetime.utcnow(), WritePrecision.NS)
+    influxdb_write_api.write(bucket='smart_measurements', record=point_alarm)
 
 
 def alarm_on():
