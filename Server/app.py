@@ -156,20 +156,34 @@ def handle_mqtt_message(client, userdata, message):
                 send_people_counter()
                 print("People counter: " + str(people_counter))
             return
-
-        if "ALARM_ON_RPIR_MOTION" in decoded_msg:
+        if message.topic == "alarm":
             global does_alarm_work, last_alarm_reason
-            if does_alarm_work is True:
+            if "ALARM_ON_" in decoded_msg:
+                if does_alarm_work is True:
+                    return
+                print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
+                device_code = decoded_msg.split("_")[-1]
+                if "RPIR_MOTION" in decoded_msg:
+                    last_alarm_reason = "Room motion detected when no one's home (" + device_code + ")"
+                elif "DOOR_SENSOR" in decoded_msg:
+                    last_alarm_reason = "Doors are open for more than 5 seconds (" + device_code + ")"
+
+                does_alarm_work = True
+                info = {
+                    "alarm_reason": last_alarm_reason,
+                    "does_alarm_work": does_alarm_work
+                }
+                socketio_app.emit('alarm_status', json.dumps(info))
                 return
-            print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
-            last_alarm_reason = "Room motion detected when no one's home (" + decoded_msg.split("_")[-1] + ")"
-            does_alarm_work = True
-            info = {
-                "alarm_reason": last_alarm_reason,
-                "does_alarm_work": does_alarm_work
-            }
-            socketio_app.emit('alarm_status', json.dumps(info))
-            return
+            
+            if decoded_msg == "ALARM_OFF":
+                does_alarm_work = False
+                info = {
+                    "alarm_reason": last_alarm_reason,
+                    "does_alarm_work": does_alarm_work
+                }
+                socketio_app.emit('alarm_status', json.dumps(info))
+                return
     
         global pi1_batch_size, pi2_batch_size, pi3_batch_size
         obj = json.loads(decoded_msg)

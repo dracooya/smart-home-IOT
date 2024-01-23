@@ -44,6 +44,7 @@ export function AlarmDialog({open, handleClose, reason, deviceService}: AlarmPro
             password: password
         }
         deviceService.disableAlarm(passwordObj).then(() => {
+            setPassword("");
             handleClose();
         }).catch(() => {
             setErrorMessage("Incorrect password!");

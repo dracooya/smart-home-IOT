@@ -109,7 +109,6 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
         }).catch(err => console.log(err));
 
         deviceService.getAlarmStatus().then( response => {
-            console.log(response)
             setAlarmReason(response.alarm_reason);
             setAlarmOn(response.does_alarm_work);
         }).catch(err => console.log(err));
