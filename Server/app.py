@@ -124,12 +124,16 @@ def deactivate_alarm():
     global does_alarm_work
     does_alarm_work = None
     print("Alarm deactivated")
+    mqtt.publish("DB", "STOP")
+    mqtt.publish("BB", "STOP")
 
 
 def trigger_alarm():
     global does_alarm_work
     does_alarm_work = True
     print("Alarm triggered")
+    mqtt.publish("DB", "START")
+    mqtt.publish("BB", "START")
 
 
 def alarm_on():
@@ -156,6 +160,23 @@ def alarm_triggered():
 def handle_mqtt_message(client, userdata, message):
     with mqtt_scheduler_lock:
         decoded_msg = message.payload.decode('utf-8')
+
+        if decoded_msg[0] == 'E':
+            global people_counter
+            with people_counter_lock:
+                if decoded_msg == 'ENTER':
+                    print("ENTERING")
+                    people_counter += 1
+                elif decoded_msg == 'EXIT':
+                    print("EXITING")
+                    if people_counter > 0:
+                        people_counter -= 1
+                    else:
+                        print("INTRUDER LEAVING THROUGH THE WINDOW :O HOOOOMAGAAAAAAWD")
+                send_people_counter()
+                print("People counter: " + str(people_counter))
+            return
+
         if message.topic == "DMS":
             if decoded_msg == super_secret_alarm_password:
                 print("PIN CORRECT")
@@ -183,32 +204,16 @@ def handle_mqtt_message(client, userdata, message):
             socketio_app.emit('alarm_status', json.dumps(info))
             return
 
-        if decoded_msg[0] == 'E':
-            global people_counter
-            with people_counter_lock:
-                if decoded_msg == 'ENTER':
-                    print("ENTERING")
-                    people_counter += 1
-                elif decoded_msg == 'EXIT':
-                    print("EXITING")
-                    if people_counter > 0:
-                        people_counter -= 1
-                    else:
-                        print("INTRUDER LEAVING THROUGH THE WINDOW :O HOOOOMAGAAAAAAWD")
-                send_people_counter()
-                print("People counter: " + str(people_counter))
-            return
-
         if "ALARM_ON_RPIR_MOTION" in decoded_msg:
             global does_alarm_work, last_alarm_reason
             if does_alarm_work is True:
                 return
+            trigger_alarm()
             print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
             last_alarm_reason = "Room motion detected when no one's home (" + decoded_msg.split("_")[-1] + ")"
-            does_alarm_work = True
             info = {
                 "alarm_reason": last_alarm_reason,
-                "does_alarm_work": does_alarm_work
+                "does_alarm_work": True
             }
             socketio_app.emit('alarm_status', json.dumps(info))
             return
@@ -367,13 +372,12 @@ def get_alarm_status():
 
 @app.route('/alarm_disable', methods=['PUT'])
 def disable_alarm():
-    global does_alarm_work
     try:
         data = request.get_json()
         password = data.get("password")
         if(password != super_secret_alarm_password):
             raise Exception
-        does_alarm_work = None
+        deactivate_alarm()
 
         return jsonify({'message': 'Alarm disabled'})
     
