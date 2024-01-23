@@ -223,6 +223,19 @@ def handle_mqtt_message(client, userdata, message):
             }
             socketio_app.emit('alarm_status', json.dumps(info))
             return
+
+        if "ALARM_ON_GSG_MOTION" in decoded_msg:
+            if alarm_triggered():
+                return
+            trigger_alarm()
+            print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
+            set_last_alarm_reason("GSG motion detected (safe thief?!?!) (" + decoded_msg.split("_")[-1] + ")")
+            info = {
+                "alarm_reason": get_last_alarm_reason(),
+                "does_alarm_work": True
+            }
+            socketio_app.emit('alarm_status', json.dumps(info))
+            return
     
         global pi1_batch_size, pi2_batch_size, pi3_batch_size
         obj = json.loads(decoded_msg)
