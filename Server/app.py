@@ -5,7 +5,7 @@ import random
 import datetime
 import time
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_mqtt import Mqtt
 from flask_cors import CORS
 from influxdb_client import WriteOptions, InfluxDBClient, WriteApi, Point, WritePrecision
@@ -43,7 +43,7 @@ people_counter = 0
 people_counter_lock = threading.Lock()
 
 mqtt_scheduler_lock = threading.Lock()
-
+super_secret_alarm_password = "4752"
 
 current_measurements = {}
 devices = []
@@ -53,13 +53,22 @@ pi3_batch_size = 0
 
 pir_last_motion_timestamp = {}
 
-does_alarm_clock_buzz = False
+last_alarm_clock = ""
+does_alarm_clock_work = False
+
+last_alarm_reason = ""
+does_alarm_work = False
 
 def set_alarm_clock_action():
-    global does_alarm_clock_buzz
-    does_alarm_clock_buzz = True
+    global last_alarm_clock, does_alarm_clock_work
+    does_alarm_clock_work = True
+    last_alarm_clock = time.strftime("%H:%M", time.localtime())
     mqtt.publish("alarm_clock_buzz", "START")
-    socketio_app.emit('alarm_clock_status', "START")
+    info = {
+        "alarm_clock_time": last_alarm_clock,
+        "does_alarm_clock_work": does_alarm_clock_work
+    }
+    socketio_app.emit('alarm_clock_status', json.dumps(info))
 
 
 def send_status_summary():
@@ -81,8 +90,13 @@ def handle_connect(client, userdata, flags, rc):
         print("Connected to broker")
         mqtt.subscribe("measurements")
         mqtt.subscribe("tracker")
+        mqtt.subscribe("alarm")
     else:
         print("Failed to connect to broker, return code", rc)
+
+
+def send_people_counter():
+    mqtt.publish("people_counter",str(people_counter))
 
 
 @mqtt.on_message()
@@ -101,7 +115,22 @@ def handle_mqtt_message(client, userdata, message):
                         people_counter -= 1
                     else:
                         print("INTRUDER LEAVING THROUGH THE WINDOW :O HOOOOMAGAAAAAAWD")
+                send_people_counter()
                 print("People counter: " + str(people_counter))
+            return
+
+        if "ALARM_ON_RPIR_MOTION" in decoded_msg:
+            global does_alarm_work,last_alarm_reason
+            if does_alarm_work:
+                return
+            print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
+            last_alarm_reason = "Room motion detected when no one's home (" + decoded_msg.split("_")[-1] + ")"
+            does_alarm_work = True
+            info = {
+                "alarm_reason": last_alarm_reason,
+                "does_alarm_work": does_alarm_work
+            }
+            socketio_app.emit('alarm_status', json.dumps(info))
             return
     
         global pi1_batch_size, pi2_batch_size, pi3_batch_size
@@ -182,8 +211,11 @@ def handle_message(message):
 def handle_message_alarm_clock(message):
     mqtt.publish("alarm_clock_buzz", message)
 
+
 @socketio_app.on('alarm_clock_off')
 def handle_alarm_clock_off(message):
+    global does_alarm_clock_work
+    does_alarm_clock_work = False
     mqtt.publish("alarm_clock_buzz", "STOP")
     
 
@@ -233,9 +265,40 @@ def get_all_devices():
         devices_and_statuses.append(device_with_status)
     return jsonify(devices_and_statuses)
 
+
 @app.route('/alarm_clock_status', methods=['GET'])
 def get_alarm_clock_status():
-    return jsonify(status=does_alarm_clock_buzz)
+    alarm_clock_time = {
+        "alarm_clock_time": last_alarm_clock,
+        "does_alarm_clock_work": does_alarm_clock_work,
+    }
+    return jsonify(alarm_clock_time)
+
+
+@app.route('/alarm_status', methods=['GET'])
+def get_alarm_status():
+    global does_alarm_work, last_alarm_reason
+    alarm_status = {
+        "alarm_reason": last_alarm_reason,
+        "does_alarm_work": does_alarm_work,
+    }
+    return jsonify(alarm_status)
+
+@app.route('/alarm_disable', methods=['PUT'])
+def disable_alarm():
+    global does_alarm_work
+    try:
+        data = request.get_json()
+        password = data.get("password")
+        if(password != super_secret_alarm_password):
+            raise Exception
+        does_alarm_work = False
+
+        return jsonify({'message': 'Alarm disabled'})
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
 
 if __name__ == '__main__':
     load_devices()

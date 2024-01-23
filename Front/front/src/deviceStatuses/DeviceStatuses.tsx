@@ -4,8 +4,7 @@ import {
     Button,
     Card,
     CardContent,
-    CardMedia, Dialog, DialogActions, DialogContent, DialogContentText,
-    DialogTitle,
+    CardMedia,
     Grid,
     ImageList,
     Tab,
@@ -19,6 +18,8 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import io from 'socket.io-client';
 import {RGBRemote} from "../RGBRemote/RGBRemote.tsx";
 import {AlarmClockRemote} from "../AlarmClockRemote/AlarmClockRemote.tsx";
+import {AlarmClockDialog} from "../AlarmClockDialog/AlarmClockDialog.tsx";
+import {AlarmDialog} from "../AlarmDIalog/AlarmDialog.tsx";
 
 interface DeviceStatusesProps {
     deviceService: DeviceService
@@ -66,6 +67,9 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
     const [alarmClockRemoteOpen, setAlarmClockRemoteOpen] = React.useState<boolean>(false);
     const socket = io('http://localhost:5000');
     const [alarmClockOn, setAlarmClockOn] = React.useState<boolean>(false);
+    const [alarmOn, setAlarmOn] = React.useState<boolean>(false);
+    const [lastAlarmClockTime, setLastAlarmClockTime] = React.useState<string>("");
+    const [alarmReason, setAlarmReason] = React.useState<string>("");
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
@@ -78,9 +82,12 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
         setAlarmClockRemoteOpen(false);
     }
 
-    const disableAlarm = () => {
-        socket.emit('alarm_clock_off', "off");
+    const handleAlarmClockDialogClose = () => {
         setAlarmClockOn(false);
+    }
+
+    const handleAlarmDialogClose = () => {
+        setAlarmOn(false);
     }
 
     useEffect(() => {
@@ -97,7 +104,14 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
         }).catch(err => console.log(err));
 
         deviceService.getAlarmClockStatus().then( response => {
-           setAlarmClockOn(response.status);
+            setLastAlarmClockTime(response.alarm_clock_time);
+            setAlarmClockOn(response.does_alarm_clock_work);
+        }).catch(err => console.log(err));
+
+        deviceService.getAlarmStatus().then( response => {
+            console.log(response)
+            setAlarmReason(response.alarm_reason);
+            setAlarmOn(response.does_alarm_work);
         }).catch(err => console.log(err));
 
     }, []);
@@ -108,8 +122,15 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
             const newMap = new Map<string,string>(Object.entries(summary));
             setDevicesStatuses(newMap);
         });
-        socket.on('alarm_clock_status', (msg) => {
-            setAlarmClockOn(true);
+        socket.on('alarm_clock_status', (alarm_clock_time) => {
+            const json = JSON.parse(alarm_clock_time)
+            setLastAlarmClockTime(json["alarm_clock_time"]);
+            setAlarmClockOn(json["does_alarm_clock_work"]);
+        });
+        socket.on('alarm_status', (alarm_status) => {
+            const json = JSON.parse(alarm_status)
+            setAlarmReason(json["alarm_reason"]);
+            setAlarmOn(json["does_alarm_work"]);
         });
     }, []);
 
@@ -207,25 +228,8 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
                 </Grid>
                 <RGBRemote open={rgbRemoteOpen} handleClose={handleRgbRemoteOpen} socket={socket}></RGBRemote>
                 <AlarmClockRemote open={alarmClockRemoteOpen} handleClose={handleAlarmClockRemoteOpen} socket={socket}></AlarmClockRemote>
-                <Dialog
-                    open={alarmClockOn}>
-                    <DialogTitle textAlign={'center'}>
-                        {"Alarm Clock Activated!"}
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText textAlign={'center'}>
-                           WAKEY WAKEY TIME FOR SCHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO :))))))))))))))))))))))))))))))))))
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Grid container>
-                            <Grid item container xs={12} sm={12} md={12} lg={12} xl={12} justifyContent={'center'} mb={2}>
-                                <Button variant='contained' onClick={disableAlarm}>Turn Off</Button>
-                            </Grid>
-                        </Grid>
-                    </DialogActions>
-                </Dialog>
-
+                <AlarmClockDialog open={alarmClockOn} handleClose={handleAlarmClockDialogClose} lastAlarmClockTime={lastAlarmClockTime} socket={socket}></AlarmClockDialog>
+                <AlarmDialog open={alarmOn} handleClose={handleAlarmDialogClose} reason={alarmReason} deviceService={deviceService}></AlarmDialog>
             </Grid>
         </>
     );

@@ -5,8 +5,21 @@ from broker_config.broker_settings import HOSTNAME, PORT
 from components import uds
 from helpers.printer import print_status
 from value_queue import value_queue
+import paho.mqtt.client as mqtt
+from broker_config.broker_settings import HOSTNAME,PORT
 
 import paho.mqtt.publish as publish
+
+people_count = 0
+client = None
+
+def on_connect(client, userdata, flags, rc):
+    client.subscribe("people_counter")
+
+def on_message(client, userdata, msg):
+    global people_count
+    people_count = int(msg.payload.decode('utf-8'))
+    print("People count:" + str(people_count))
 
 
 def motion(code, settings):
@@ -33,6 +46,10 @@ def motion(code, settings):
         else:
             print_status(code, "Distance is increasing, someone is leaving")
             publish.single("tracker", "EXIT", hostname=HOSTNAME, port=PORT)
+    if code[0] == "R":
+        print("People count (RPIR DETECTION):" + str(people_count))
+        if people_count == 0:
+            publish.single("alarm", "ALARM_ON_RPIR_MOTION_" + code, hostname=HOSTNAME, port=PORT)
 
 
 def no_motion(code, settings):
@@ -49,6 +66,12 @@ def no_motion(code, settings):
     value_queue.put(val)
 
 def run(code, settings, threads, stop_event):
+    global client
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(HOSTNAME, PORT)
+    client.loop_start()
     if settings['simulated']:
         from simulators.pir import simulate
         thread = threading.Thread(target=simulate,

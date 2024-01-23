@@ -1,3 +1,4 @@
 export interface AlarmClockStatus {
-    status: boolean
+    alarm_clock_time: string
+    does_alarm_clock_work: boolean
 }
