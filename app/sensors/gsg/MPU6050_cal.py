@@ -7,7 +7,7 @@ def avg_from_array(a_array):
     for index in range(0, len(a_array)):
         sum += a_array[index]
 
-    return sum/len(a_array)
+    return sum / len(a_array)
 
 
 i2c_bus = 1
@@ -16,7 +16,7 @@ device_address = 0x68
 # accordingly using a calibration procedure
 x_accel_offset = 0
 y_accel_offset = 0
-z_accel_offset =0
+z_accel_offset = 0
 x_gyro_offset = 0
 y_gyro_offset = 0
 z_gyro_offset = 0
@@ -43,13 +43,13 @@ x_accel_reading = accel_reading[0]
 y_accel_reading = accel_reading[1]
 z_accel_reading = accel_reading[2]
 
-x_accel_avg = [0]*100
-y_accel_avg = [0]*100
-z_accel_avg = [0]*100
+x_accel_avg = [0] * 100
+y_accel_avg = [0] * 100
+z_accel_avg = [0] * 100
 
-x_accel_offset_avg = [0]*100
-y_accel_offset_avg = [0]*100
-z_accel_offset_avg = [0]*100
+x_accel_offset_avg = [0] * 100
+y_accel_offset_avg = [0] * 100
+z_accel_offset_avg = [0] * 100
 
 axindex = 0
 ayindex = 0
@@ -61,13 +61,13 @@ x_gyro_reading = gyro_reading[0]
 y_gyro_reading = gyro_reading[1]
 z_gyro_reading = gyro_reading[2]
 
-x_gyro_avg = [0]*100
-y_gyro_avg = [0]*100
-z_gyro_avg = [0]*100
+x_gyro_avg = [0] * 100
+y_gyro_avg = [0] * 100
+z_gyro_avg = [0] * 100
 
-x_gyro_offset_avg = [0]*100
-y_gyro_offset_avg = [0]*100
-z_gyro_offset_avg = [0]*100
+x_gyro_offset_avg = [0] * 100
+y_gyro_offset_avg = [0] * 100
+z_gyro_offset_avg = [0] * 100
 
 gxindex = 0
 gyindex = 0
