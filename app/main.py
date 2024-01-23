@@ -60,6 +60,7 @@ def user_input(stop_event):
                 print(Fore.RED + "Invalid input! Enter a 4-digit pin code ending with #.")
                 continue
             simulators.dms.attempt = some_input
+            simulators.dms.send = True
         else:
             pass
 

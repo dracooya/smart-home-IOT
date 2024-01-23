@@ -61,6 +61,17 @@ does_alarm_clock_work = False
 last_alarm_reason = ""
 does_alarm_work = None
 
+
+def set_last_alarm_reason(reason):
+    global last_alarm_reason
+    last_alarm_reason = reason
+
+
+def get_last_alarm_reason():
+    global last_alarm_reason
+    return last_alarm_reason
+
+
 def set_alarm_clock_action():
     global last_alarm_clock, does_alarm_clock_work
     does_alarm_clock_work = True
@@ -94,6 +105,7 @@ def handle_connect(client, userdata, flags, rc):
         mqtt.subscribe("tracker")
         mqtt.subscribe("alarm")
         mqtt.subscribe("DMS")
+        mqtt.subscribe("DS")
     else:
         print("Failed to connect to broker, return code", rc)
 
@@ -114,6 +126,12 @@ def deactivate_alarm():
     print("Alarm deactivated")
 
 
+def trigger_alarm():
+    global does_alarm_work
+    does_alarm_work = True
+    print("Alarm triggered")
+
+
 def alarm_on():
     global does_alarm_work
     return does_alarm_work is True or does_alarm_work is False
@@ -122,6 +140,16 @@ def alarm_on():
 def alarm_off():
     global does_alarm_work
     return does_alarm_work is None
+
+
+def alarm_ready():
+    global does_alarm_work
+    return does_alarm_work is False
+
+
+def alarm_triggered():
+    global does_alarm_work
+    return does_alarm_work is True
 
 
 @mqtt.on_message()
@@ -139,6 +167,20 @@ def handle_mqtt_message(client, userdata, message):
                     deactivate_alarm()
             else:
                 print("PIN INCORRECT")
+            return
+
+        if message.topic == "DS":
+            if alarm_triggered() or not alarm_ready():
+                return
+            trigger_alarm()
+            print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
+            print(decoded_msg)
+            set_last_alarm_reason("Door sensor motion detected while security system is activated (" + decoded_msg + ")")
+            info = {
+                "alarm_reason": get_last_alarm_reason(),
+                "does_alarm_work": True
+            }
+            socketio_app.emit('alarm_status', json.dumps(info))
             return
 
         if decoded_msg[0] == 'E':

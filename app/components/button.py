@@ -3,6 +3,8 @@ import time
 from helpers.printer import print_status
 from simulators.button import run_button_simulator
 from value_queue import value_queue
+from broker_config.broker_settings import HOSTNAME, PORT
+import paho.mqtt.publish as publish
 
 
 def button_callback(code, settings):
@@ -17,6 +19,7 @@ def button_callback(code, settings):
         "pi": settings["pi"]
 
     }
+    publish.single("DS", code, hostname=HOSTNAME, port=PORT)
     value_queue.put(val)
 
 
