@@ -27,8 +27,9 @@ def button_register(pin,callback_fc, callback_long_fc, callback_release_fc):
             is_pressing = False
             sent_alarm_alert = False
             callback_fc(press_time_start * 1000)
+
             if is_long_detected:
-                callback_release_fc()
+                callback_release_fc(True, time.time() * 1000)
 
         if is_pressing and not is_long_detected:
             press_duration = time.time() - press_time_start
