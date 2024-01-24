@@ -241,6 +241,7 @@ def handle_mqtt_message(client, userdata, message):
                     alarm_type = "RPIR_MOTION"
                     set_last_alarm_reason("Room motion detected when no one's home (" + device_code + ")", alarm_type)
                 elif "DOOR_SENSOR" in decoded_msg:
+                    print("yes")
                     alarm_type = "DS_DURATION"
                     set_last_alarm_reason("Doors are open for more than 5 seconds (" + device_code + ")", alarm_type)
                 elif "GSG_MOTION" in decoded_msg:
@@ -270,7 +271,11 @@ def handle_mqtt_message(client, userdata, message):
     
         global pi1_batch_size, pi2_batch_size, pi3_batch_size
         obj = json.loads(decoded_msg)
-        if obj['deviceType'] == "DHT":
+
+        if obj["deviceType"] == "4SD":
+            pass
+            
+        elif obj['deviceType'] == "DHT":
             tokens = obj['value'].split("%")
             humidity = tokens[0]
             temperature = tokens[1].split("°")[0].split(",")[1].strip()

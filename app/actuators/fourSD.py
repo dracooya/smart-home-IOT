@@ -50,12 +50,24 @@ def fourSD_register(pins, callback_fc, alarm_buzz_start_event, alarm_buzz_stop_e
                     else:
                         GPIO.output(25, 0)
                 GPIO.output(digits[digit], 0)
+                time.sleep(0.001)
+                slept_for += 0.001
+                GPIO.output(digits[digit], 1)
+            
+            # MOZDA radi blikanje fuck if i knew
+            if sleep_duration == 0.5:
                 time.sleep(sleep_duration)
                 slept_for += sleep_duration
-                GPIO.output(digits[digit], 1)
-                if(slept_for >= 10):
-                    slept_for = 0
-                    callback_fc("Current time: " + time.strftime("%H:%M", time.localtime()))
+                for digit in range(4):
+                    for loop in range(0,7):
+                        GPIO.output(segments[loop], 0)
+                    GPIO.output(digits[digit], 0)
+                time.sleep(sleep_duration)
+                sleep_duration += sleep_duration
+
+            if(slept_for >= 10):
+                slept_for = 0
+                callback_fc("Current time: " + time.strftime("%H:%M", time.localtime()))
             if stop_event.is_set():
                 break
     finally:
