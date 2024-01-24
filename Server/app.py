@@ -154,7 +154,8 @@ def trigger_alarm(type):
     mqtt.publish("DB", "START")
     mqtt.publish("BB", "START")
 
-    point_alarm = Point('alarm').field('_measurement', 'TRIGGERED').time(datetime.datetime.utcnow(), WritePrecision.NS)
+    point_alarm = Point('alarm').field('_measurement', 'TRIGGERED').time(datetime.datetime.utcnow(), WritePrecision.NS)\
+        .tag('reason', get_last_alarm_reason())
     influxdb_write_api.write(bucket='smart_measurements', record=point_alarm)
 
 
@@ -217,10 +218,8 @@ def handle_mqtt_message(client, userdata, message):
             alarm_type = "DS_SYS_DEACT"
             if alarm_triggered(alarm_type) or not alarm_ready(alarm_type):
                 return
-            trigger_alarm(alarm_type)
-            print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
-            print(decoded_msg)
             set_last_alarm_reason("Door sensor motion detected while security system is activated (" + decoded_msg + ")", alarm_type)
+            trigger_alarm(alarm_type)
             info = {
                 "alarm_reason": get_last_alarm_reason(alarm_type),
                 "does_alarm_work": True,
@@ -265,9 +264,9 @@ def handle_mqtt_message(client, userdata, message):
         if "ALARM_ON_GSG_MOTION" in decoded_msg:
             if alarm_triggered():
                 return
-            trigger_alarm()
             print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
             set_last_alarm_reason("GSG motion detected (safe thief?!?!) (" + decoded_msg.split("_")[-1] + ")")
+            trigger_alarm()
             info = {
                 "alarm_reason": get_last_alarm_reason(),
                 "does_alarm_work": True
