@@ -140,15 +140,24 @@ def activate_alarm(type):
     print("Alarm of type " + type + " activated")
 
 
-def deactivate_alarm(type):
+def deactivate_alarm(type, ping=True):
     global alarm_type_with_info
     alarm_type_with_info[type]["does_alarm_work"] = None
     print("Alarm of type " + type + " deactivated")
-    mqtt.publish("DB", "STOP")
-    mqtt.publish("BB", "STOP")
 
-    point_alarm = Point('alarm').field('_measurement', 'DEACTIVATED').time(datetime.datetime.utcnow(), WritePrecision.NS)
-    influxdb_write_api.write(bucket='smart_measurements', record=point_alarm)
+    stop_buzzing = True
+    for alarm in alarm_type_with_info.values():
+        if alarm["does_alarm_work"] is True:
+            stop_buzzing = False
+
+    if stop_buzzing:
+        mqtt.publish("DB", "STOP")
+        mqtt.publish("BB", "STOP")
+
+    if ping:
+        point_alarm = Point('alarm').field('_measurement', 'DEACTIVATED').time(datetime.datetime.utcnow(), WritePrecision.NS)\
+            .tag('type', type)
+        influxdb_write_api.write(bucket='smart_measurements', record=point_alarm)
 
 
 def trigger_alarm(type):
@@ -159,7 +168,7 @@ def trigger_alarm(type):
     mqtt.publish("BB", "START")
 
     point_alarm = Point('alarm').field('_measurement', 'TRIGGERED').time(datetime.datetime.utcnow(), WritePrecision.NS)\
-        .tag('reason', get_last_alarm_reason(type))
+        .tag('type', type)
     influxdb_write_api.write(bucket='smart_measurements', record=point_alarm)
 
 
@@ -212,7 +221,9 @@ def handle_mqtt_message(client, userdata, message):
                     scheduler = sched.scheduler(time.time, time.sleep)
                     scheduler.enter(10, 1, lambda: activate_alarm(alarm_type))
                     scheduler.run()
-                elif alarm_on(alarm_type):
+                elif alarm_ready(alarm_type):
+                    deactivate_alarm(alarm_type, ping=False)
+                elif alarm_triggered(alarm_type):
                     deactivate_alarm(alarm_type)
             else:
                 print("PIN INCORRECT")
@@ -257,7 +268,7 @@ def handle_mqtt_message(client, userdata, message):
                 
             if decoded_msg == "ALARM_OFF":
                 alarm_type = "DS_DURATION"
-                activate_alarm(alarm_type)
+                deactivate_alarm(alarm_type)
                 info = {
                     "alarm_reason": get_last_alarm_reason(alarm_type),
                     "does_alarm_work": False,

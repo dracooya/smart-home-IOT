@@ -3,6 +3,8 @@ import threading
 from colorama import Fore
 
 from components import button, led, uds, buzzer, pir, dht, dms, fourSD, infrared, rgb_light, lcd, gsg
+from events.AlarmOffEvent import AlarmOffEvent
+from events.AlarmOnEvent import AlarmOnEvent
 from events.BuzzerPressEvent import BuzzerPressEvent
 from events.BuzzerReleaseEvent import BuzzerReleaseEvent
 from events.DoorLightOffEvent import DoorLightOffEvent
@@ -32,6 +34,9 @@ rgb_change_event = RGBChangeEvent()
 
 alarm_clock_on_event = AlarmClockOnEvent()
 alarm_clock_off_event = AlarmClockOffEvent()
+
+alarm_on_event = AlarmOnEvent()
+alarm_off_event = AlarmOffEvent()
 
 
 def invalid_input(some_input):
@@ -96,7 +101,7 @@ def main():
             if key in ["DB", "BB"]:
                 buzzer.run_buzzer(key, settings[key], devices_threads, buzzer_press_event, buzzer_release_event,
                                   alarm_clock_on_event, alarm_clock_off_event,
-                                  stop_event)
+                                  stop_event, alarm_on_event, alarm_off_event)
             if key in ["DPIR1", "DPIR2", "RPIR1", "RPIR2", "RPIR3", "RPIR4"]:
                 pir.run(key, settings[key], devices_threads, stop_event)
             if key in ["RDHT1", "RDHT2", "RDHT3", "RDHT4", "GDHT"]:
