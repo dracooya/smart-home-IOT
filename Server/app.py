@@ -53,6 +53,7 @@ pi2_batch_size = 0
 pi3_batch_size = 0 
 
 pir_last_motion_timestamp = {}
+last_gsg_ping = 0
 
 last_alarm_clock = ""
 does_alarm_clock_work = False
@@ -106,6 +107,9 @@ def set_alarm_clock_action():
 
 def send_status_summary():
     global current_measurements
+    now = time.time() * 1000
+    if now - last_gsg_ping > 30000:
+        current_measurements['GSG'] = 'NO MOTION'
     socketio_app.emit('status', json.dumps(current_measurements))
 
 
@@ -321,6 +325,10 @@ def handle_mqtt_message(client, userdata, message):
                 if abs(now - int(obj['timestamp'])) > 5000:
                     current_measurements[obj["deviceId"]] = "NO MOTION"
             pir_last_motion_timestamp[obj['deviceId']] = int(obj['timestamp'])
+
+        if (obj['deviceType'] == "GSG"):
+            global last_gsg_ping
+            last_gsg_ping = time.time() * 1000
 
         if(obj['pi'] == 1):
             if pi1_batch_size == 19:
