@@ -61,15 +61,31 @@ does_alarm_clock_work = False
 last_alarm_reason = ""
 does_alarm_work = None
 
+alarm_type_with_info = {}
 
-def set_last_alarm_reason(reason):
-    global last_alarm_reason
-    last_alarm_reason = reason
+def initialize_alarm_map() :
+    default_info = {
+            "alarm_reason": "",
+            "does_alarm_work": None,
+            "alarm_type": ""
+            }
+    default_info["alarm_type"] = "RPIR_MOTION"
+    alarm_type_with_info["RPIR_MOTION"] = default_info # no one's home and rpir detects motion
+    default_info = default_info.copy()
+    default_info["alarm_type"] = "DS_DURATION"
+    alarm_type_with_info["DS_DURATION"] = default_info # doors are open for more than 5 seconds
+    default_info = default_info.copy()
+    default_info["alarm_type"] = "DS_SYS_DEACT"
+    alarm_type_with_info["DS_SYS_DEACT"] = default_info # door sensor when system is deactivated
+
+def set_last_alarm_reason(reason, type):
+    global alarm_type_with_info
+    alarm_type_with_info[type]["alarm_reason"] = reason
 
 
-def get_last_alarm_reason():
-    global last_alarm_reason
-    return last_alarm_reason
+def get_last_alarm_reason(type):
+    global alarm_type_with_info
+    return alarm_type_with_info[type]["alarm_reason"]
 
 
 def set_alarm_clock_action():
@@ -114,46 +130,46 @@ def send_people_counter():
     mqtt.publish("people_counter", str(people_counter))
 
 
-def activate_alarm():
-    global does_alarm_work
-    does_alarm_work = False
-    print("Alarm activated")
+def activate_alarm(type):
+    global alarm_type_with_info
+    alarm_type_with_info[type]["does_alarm_work"] = False
+    print("Alarm of type " + type + " activated")
 
 
-def deactivate_alarm():
-    global does_alarm_work
-    does_alarm_work = None
-    print("Alarm deactivated")
+def deactivate_alarm(type):
+    global alarm_type_with_info
+    alarm_type_with_info[type]["does_alarm_work"] = None
+    print("Alarm of type " + type + " deactivated")
     mqtt.publish("DB", "STOP")
     mqtt.publish("BB", "STOP")
 
 
-def trigger_alarm():
-    global does_alarm_work
-    does_alarm_work = True
-    print("Alarm triggered")
+def trigger_alarm(type):
+    global alarm_type_with_info
+    alarm_type_with_info[type]["does_alarm_work"] = True
+    print("Alarm of type " + type + " triggered")
     mqtt.publish("DB", "START")
     mqtt.publish("BB", "START")
 
 
-def alarm_on():
-    global does_alarm_work
-    return does_alarm_work is True or does_alarm_work is False
+def alarm_on(type):
+    global alarm_type_with_info
+    return alarm_type_with_info[type]["does_alarm_work"] is True or alarm_type_with_info[type]["does_alarm_work"] is False
 
 
-def alarm_off():
-    global does_alarm_work
-    return does_alarm_work is None
+def alarm_off(type):
+    global alarm_type_with_info
+    return alarm_type_with_info[type]["does_alarm_work"] is None
 
 
-def alarm_ready():
-    global does_alarm_work
-    return does_alarm_work is False
+def alarm_ready(type):
+    global alarm_type_with_info
+    return alarm_type_with_info[type]["does_alarm_work"] is False
 
 
-def alarm_triggered():
-    global does_alarm_work
-    return does_alarm_work is True
+def alarm_triggered(type):
+    global alarm_type_with_info
+    return alarm_type_with_info[type]["does_alarm_work"] is True
 
 
 @mqtt.on_message()
@@ -192,58 +208,53 @@ def handle_mqtt_message(client, userdata, message):
             return
 
         if message.topic == "DS":
-            if alarm_triggered() or not alarm_ready():
+            alarm_type = "DS_SYS_DEACT"
+            if alarm_triggered(alarm_type) or not alarm_ready(alarm_type):
                 return
-            trigger_alarm()
+            trigger_alarm(alarm_type)
             print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
             print(decoded_msg)
-            set_last_alarm_reason("Door sensor motion detected while security system is activated (" + decoded_msg + ")")
+            set_last_alarm_reason("Door sensor motion detected while security system is activated (" + decoded_msg + ")", alarm_type)
             info = {
-                "alarm_reason": get_last_alarm_reason(),
-                "does_alarm_work": True
+                "alarm_reason": get_last_alarm_reason(alarm_type),
+                "does_alarm_work": True,
+                "alarm_type": alarm_type
             }
             socketio_app.emit('alarm_status', json.dumps(info))
             return
+        
         if message.topic == "alarm":
-            if "ALARM_ON_RPIR_MOTION" in decoded_msg:
-                global does_alarm_work, last_alarm_reason
-                if "ALARM_ON_" in decoded_msg:
-                    if does_alarm_work is True:
-                        return
-                    print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
-                    device_code = decoded_msg.split("_")[-1]
-                    if "RPIR_MOTION" in decoded_msg:
-                        last_alarm_reason = "Room motion detected when no one's home (" + device_code + ")"
-                    elif "DOOR_SENSOR" in decoded_msg:
-                        last_alarm_reason = "Doors are open for more than 5 seconds (" + device_code + ")"
+            alarm_type = ""
+            if "ALARM_ON_" in decoded_msg:
+                device_code = decoded_msg.split("_")[-1]
+                if "RPIR_MOTION" in decoded_msg:
+                    alarm_type = "RPIR_MOTION"
+                    set_last_alarm_reason("Room motion detected when no one's home (" + device_code + ")", alarm_type)
+                elif "DOOR_SENSOR" in decoded_msg:
+                    alarm_type = "DS_DURATION"
+                    set_last_alarm_reason("Doors are open for more than 5 seconds (" + device_code + ")", alarm_type)
 
-                    does_alarm_work = True
-                    info = {
-                        "alarm_reason": last_alarm_reason,
-                        "does_alarm_work": does_alarm_work
-                    }
-                    socketio_app.emit('alarm_status', json.dumps(info))
-                    return
+                info = {
+                    "alarm_reason": get_last_alarm_reason(alarm_type),
+                    "does_alarm_work": True,
+                    "alarm_type": alarm_type
+                }
+                socketio_app.emit('alarm_status', json.dumps(info))
                 
-                if decoded_msg == "ALARM_OFF":
-                    does_alarm_work = False
-                    info = {
-                        "alarm_reason": last_alarm_reason,
-                        "does_alarm_work": does_alarm_work
-                    }
-                    socketio_app.emit('alarm_status', json.dumps(info))
-                    return
+            if decoded_msg == "ALARM_OFF":
+                alarm_type = "DS_DURATION"
+                activate_alarm(alarm_type)
+                info = {
+                    "alarm_reason": get_last_alarm_reason(alarm_type),
+                    "does_alarm_work": False,
+                    "alarm_type": alarm_type
+                }
+                socketio_app.emit('alarm_status', json.dumps(info))
+                return
 
-            trigger_alarm()
-            print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
-            last_alarm_reason = "Room motion detected when no one's home (" + decoded_msg.split("_")[-1] + ")"
-            info = {
-                "alarm_reason": last_alarm_reason,
-                "does_alarm_work": True
-            }
-            socketio_app.emit('alarm_status', json.dumps(info))
+            trigger_alarm(alarm_type)
             return
-    
+            
         global pi1_batch_size, pi2_batch_size, pi3_batch_size
         obj = json.loads(decoded_msg)
         if obj['deviceType'] == "DHT":
@@ -307,6 +318,7 @@ def handle_message(message):
         "value": message
     }
     mqtt.publish("rgb_remote_web", json.dumps(command))
+
 
 @socketio_app.on('alarm_clock_time')
 def handle_message(message):
@@ -388,24 +400,28 @@ def get_alarm_clock_status():
 
 @app.route('/alarm_status', methods=['GET'])
 def get_alarm_status():
-    global does_alarm_work, last_alarm_reason
-    alarm_status = {
-        "alarm_reason": last_alarm_reason,
-        "does_alarm_work": does_alarm_work,
-    }
-    return jsonify(alarm_status)
+    global alarm_type_with_info
+    statuses = []
+    for key, val in alarm_type_with_info.items():
+        alarm_status = {
+            "alarm_reason": val["alarm_reason"],
+            "does_alarm_work": val["does_alarm_work"],
+            "alarm_type": key
+        }
+        statuses.append(alarm_status)
+    return jsonify(statuses)
 
 
-@app.route('/alarm_disable', methods=['PUT'])
-def disable_alarm():
+@app.route('/alarm_disable/<alarm_type>', methods=['PUT'])
+def disable_alarm(alarm_type):
     try:
         data = request.get_json()
         password = data.get("password")
         if(password != super_secret_alarm_password):
             raise Exception
-        deactivate_alarm()
+        deactivate_alarm(alarm_type)
 
-        return jsonify({'message': 'Alarm disabled'})
+        return jsonify({'message': 'Alarm of type ' + alarm_type + ' disabled'})
     
     except Exception as e:
         return jsonify({'error': str(e)}), 400
@@ -413,6 +429,7 @@ def disable_alarm():
 
 if __name__ == '__main__':
     load_devices()
+    initialize_alarm_map()
     scheduler_thread = threading.Thread(target=scheduler.start)
     scheduler_thread.start()
     socketio_app.run(app, debug=False)
