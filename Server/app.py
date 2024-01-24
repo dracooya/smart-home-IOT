@@ -24,7 +24,6 @@ def on_exit(db: InfluxDBClient, write_api: WriteApi, mqtt: Mqtt):
     scheduler.shutdown()
 
 
-
 app = Flask(__name__)
 socketio_app = SocketIO(app, cors_allowed_origins="http://localhost:5173", async_mode='threading')
 
@@ -63,6 +62,7 @@ does_alarm_work = None
 
 alarm_type_with_info = {}
 
+
 def initialize_alarm_map() :
     default_info = {
             "alarm_reason": "",
@@ -75,8 +75,12 @@ def initialize_alarm_map() :
     default_info["alarm_type"] = "DS_DURATION"
     alarm_type_with_info["DS_DURATION"] = default_info # doors are open for more than 5 seconds
     default_info = default_info.copy()
-    default_info["alarm_type"] = "DS_SYS_DEACT"
-    alarm_type_with_info["DS_SYS_DEACT"] = default_info # door sensor when system is deactivated
+    default_info["alarm_type"] = "DS_SYS_ACT"
+    alarm_type_with_info["DS_SYS_ACT"] = default_info # door sensor when system is activated
+    default_info = default_info.copy()
+    default_info["alarm_type"] = "GSG_MOTION"
+    alarm_type_with_info["GSG_MOTION"] = default_info  # gun safe moved
+
 
 def set_last_alarm_reason(reason, type):
     global alarm_type_with_info
@@ -155,7 +159,7 @@ def trigger_alarm(type):
     mqtt.publish("BB", "START")
 
     point_alarm = Point('alarm').field('_measurement', 'TRIGGERED').time(datetime.datetime.utcnow(), WritePrecision.NS)\
-        .tag('reason', get_last_alarm_reason())
+        .tag('reason', get_last_alarm_reason(type))
     influxdb_write_api.write(bucket='smart_measurements', record=point_alarm)
 
 
@@ -200,25 +204,26 @@ def handle_mqtt_message(client, userdata, message):
                 print("People counter: " + str(people_counter))
             return
 
-
         if message.topic == "DMS":
             if decoded_msg == super_secret_alarm_password:
                 print("PIN CORRECT")
-                if alarm_off():
+                alarm_type = "DS_SYS_ACT"
+                if alarm_off(alarm_type):
                     scheduler = sched.scheduler(time.time, time.sleep)
-                    scheduler.enter(10, 1, activate_alarm)
+                    scheduler.enter(10, 1, lambda: activate_alarm(alarm_type))
                     scheduler.run()
-                elif alarm_on():
-                    deactivate_alarm()
+                elif alarm_on(alarm_type):
+                    deactivate_alarm(alarm_type)
             else:
                 print("PIN INCORRECT")
             return
 
         if message.topic == "DS":
-            alarm_type = "DS_SYS_DEACT"
+            alarm_type = "DS_SYS_ACT"
             if alarm_triggered(alarm_type) or not alarm_ready(alarm_type):
                 return
-            set_last_alarm_reason("Door sensor motion detected while security system is activated (" + decoded_msg + ")", alarm_type)
+            set_last_alarm_reason("Door sensor motion detected while security system is activated (" + decoded_msg + ")",
+                                  alarm_type)
             trigger_alarm(alarm_type)
             info = {
                 "alarm_reason": get_last_alarm_reason(alarm_type),
@@ -238,6 +243,9 @@ def handle_mqtt_message(client, userdata, message):
                 elif "DOOR_SENSOR" in decoded_msg:
                     alarm_type = "DS_DURATION"
                     set_last_alarm_reason("Doors are open for more than 5 seconds (" + device_code + ")", alarm_type)
+                elif "GSG_MOTION" in decoded_msg:
+                    alarm_type = "GSG_MOTION"
+                    set_last_alarm_reason("Gun safe motion detected (" + device_code + ")", alarm_type)
 
                 info = {
                     "alarm_reason": get_last_alarm_reason(alarm_type),
@@ -258,20 +266,6 @@ def handle_mqtt_message(client, userdata, message):
                 return
 
             trigger_alarm(alarm_type)
-            return
-
-
-        if "ALARM_ON_GSG_MOTION" in decoded_msg:
-            if alarm_triggered():
-                return
-            print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
-            set_last_alarm_reason("GSG motion detected (safe thief?!?!) (" + decoded_msg.split("_")[-1] + ")")
-            trigger_alarm()
-            info = {
-                "alarm_reason": get_last_alarm_reason(),
-                "does_alarm_work": True
-            }
-            socketio_app.emit('alarm_status', json.dumps(info))
             return
     
         global pi1_batch_size, pi2_batch_size, pi3_batch_size
