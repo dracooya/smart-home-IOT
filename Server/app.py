@@ -138,7 +138,8 @@ def trigger_alarm():
     mqtt.publish("DB", "START")
     mqtt.publish("BB", "START")
 
-    point_alarm = Point('alarm').field('_measurement', 'TRIGGERED').time(datetime.datetime.utcnow(), WritePrecision.NS)
+    point_alarm = Point('alarm').field('_measurement', 'TRIGGERED').time(datetime.datetime.utcnow(), WritePrecision.NS)\
+        .tag('reason', get_last_alarm_reason())
     influxdb_write_api.write(bucket='smart_measurements', record=point_alarm)
 
 
@@ -199,10 +200,10 @@ def handle_mqtt_message(client, userdata, message):
         if message.topic == "DS":
             if alarm_triggered() or not alarm_ready():
                 return
-            trigger_alarm()
             print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
             print(decoded_msg)
             set_last_alarm_reason("Door sensor motion detected while security system is activated (" + decoded_msg + ")")
+            trigger_alarm()
             info = {
                 "alarm_reason": get_last_alarm_reason(),
                 "does_alarm_work": True
@@ -212,13 +213,13 @@ def handle_mqtt_message(client, userdata, message):
 
         if "ALARM_ON_RPIR_MOTION" in decoded_msg:
             global does_alarm_work, last_alarm_reason
-            if does_alarm_work is True:
+            if alarm_triggered():
                 return
-            trigger_alarm()
             print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
-            last_alarm_reason = "Room motion detected when no one's home (" + decoded_msg.split("_")[-1] + ")"
+            set_last_alarm_reason("Room motion detected when no one's home (" + decoded_msg.split("_")[-1] + ")")
+            trigger_alarm()
             info = {
-                "alarm_reason": last_alarm_reason,
+                "alarm_reason": get_last_alarm_reason(),
                 "does_alarm_work": True
             }
             socketio_app.emit('alarm_status', json.dumps(info))
@@ -227,9 +228,9 @@ def handle_mqtt_message(client, userdata, message):
         if "ALARM_ON_GSG_MOTION" in decoded_msg:
             if alarm_triggered():
                 return
-            trigger_alarm()
             print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
             set_last_alarm_reason("GSG motion detected (safe thief?!?!) (" + decoded_msg.split("_")[-1] + ")")
+            trigger_alarm()
             info = {
                 "alarm_reason": get_last_alarm_reason(),
                 "does_alarm_work": True
