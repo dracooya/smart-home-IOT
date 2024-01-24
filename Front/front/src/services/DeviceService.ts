@@ -28,10 +28,10 @@ export class DeviceService {
     }
 
 
-    public disableAlarm(password : Password) : Promise<string> {
+    public disableAlarm(password : Password, alarmType: string) : Promise<string> {
         return axios({
             method: 'PUT',
-            url: `${this.api_host}/alarm_disable`,
+            url: `${this.api_host}/alarm_disable/${alarmType}`,
             data: password
         }).then((response) => response.data
         ).catch((err) => {
@@ -39,7 +39,7 @@ export class DeviceService {
         });
     }
 
-    public getAlarmStatus() : Promise<AlarmStatus> {
+    public getAlarmStatus() : Promise<AlarmStatus[]> {
         return axios({
             method: 'GET',
             url: `${this.api_host}/alarm_status`,

@@ -5,23 +5,35 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    Grid, TextField,
+    Grid, Paper, PaperProps, TextField,
     Typography
 } from "@mui/material";
 import React from "react";
 import {PopupMessage} from "../PopupMessage/PopupMessage.tsx";
 import {Password} from "../models/Password.ts";
 import {DeviceService} from "../services/DeviceService.ts";
+import Draggable from 'react-draggable';
 
 
 interface AlarmProps {
     open: boolean,
     handleClose: () => void,
     reason : string,
+    alarmType: string,
     deviceService : DeviceService
 }
 
-export function AlarmDialog({open, handleClose, reason, deviceService}: AlarmProps) {
+function PaperComponent(props: PaperProps) {
+    return (
+        <Draggable
+            handle="#draggable-dialog-title"
+            cancel={'[class*="MuiDialogContent-root"]'}>
+            <Paper {...props} />
+        </Draggable>
+    );
+}
+
+export function AlarmDialog({open, handleClose, reason, alarmType, deviceService}: AlarmProps) {
 
     const [password, setPassword] = React.useState<string>("");
     const [errorColor, setErrorColor] = React.useState<string>("transparent");
@@ -43,7 +55,8 @@ export function AlarmDialog({open, handleClose, reason, deviceService}: AlarmPro
         const passwordObj : Password = {
             password: password
         }
-        deviceService.disableAlarm(passwordObj).then(() => {
+        deviceService.disableAlarm(passwordObj, alarmType).then(() => {
+            setPassword("");
             handleClose();
         }).catch(() => {
             setErrorMessage("Incorrect password!");
@@ -59,8 +72,10 @@ export function AlarmDialog({open, handleClose, reason, deviceService}: AlarmPro
                         border: '2px solid red'
                     },
                 }}
+                PaperComponent={PaperComponent}
+                aria-labelledby="draggable-dialog-title"
                 open={open}>
-                <DialogTitle textAlign={'center'} sx={{background:"rgba(255,0,0,0.2)"}}>
+                <DialogTitle textAlign={'center'} sx={{background:"rgba(255,0,0,0.2)"}}  id="draggable-dialog-title">
                     <Typography variant={'h4'}><b>{"Alarm Activated! \\Ö/ \\Ö/ \\Ö/ \\Ö/"}</b></Typography>
                 </DialogTitle>
                 <DialogContent>

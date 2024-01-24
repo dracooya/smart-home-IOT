@@ -19,7 +19,8 @@ import io from 'socket.io-client';
 import {RGBRemote} from "../RGBRemote/RGBRemote.tsx";
 import {AlarmClockRemote} from "../AlarmClockRemote/AlarmClockRemote.tsx";
 import {AlarmClockDialog} from "../AlarmClockDialog/AlarmClockDialog.tsx";
-import {AlarmDialog} from "../AlarmDIalog/AlarmDialog.tsx";
+import {AlarmDialog} from "../AlarmDialog/AlarmDialog.tsx";
+import {AlarmStatus} from "../models/AlarmStatus.ts";
 
 interface DeviceStatusesProps {
     deviceService: DeviceService
@@ -67,9 +68,8 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
     const [alarmClockRemoteOpen, setAlarmClockRemoteOpen] = React.useState<boolean>(false);
     const socket = io('http://localhost:5000');
     const [alarmClockOn, setAlarmClockOn] = React.useState<boolean>(false);
-    const [alarmOn, setAlarmOn] = React.useState<boolean>(false);
     const [lastAlarmClockTime, setLastAlarmClockTime] = React.useState<string>("");
-    const [alarmReason, setAlarmReason] = React.useState<string>("");
+    const [alarmStatuses, setAlarmStatuses] = React.useState<Map<string,object>>(new Map<string, AlarmStatus>());
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
@@ -86,8 +86,11 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
         setAlarmClockOn(false);
     }
 
-    const handleAlarmDialogClose = () => {
-        setAlarmOn(false);
+    const handleAlarmDialogClose = (type: string) => {
+        const obj_old = alarmStatuses.get(type) as AlarmStatus;
+        obj_old.does_alarm_work = false
+        setAlarmStatuses(alarmStatuses => new Map(alarmStatuses.set(type, { ...alarmStatuses.get(type), ...obj_old })));
+        console.log(alarmStatuses);
     }
 
     useEffect(() => {
@@ -99,7 +102,6 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
                 })
                 setDevices(response);
             }
-            setDevices(response);
             shouldLoad.current = false;
         }).catch(err => console.log(err));
 
@@ -109,9 +111,9 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
         }).catch(err => console.log(err));
 
         deviceService.getAlarmStatus().then( response => {
-            console.log(response)
-            setAlarmReason(response.alarm_reason);
-            setAlarmOn(response.does_alarm_work);
+            response.forEach(status => {
+                alarmStatuses.set(status.alarm_type, status);
+            })
         }).catch(err => console.log(err));
 
     }, []);
@@ -129,8 +131,13 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
         });
         socket.on('alarm_status', (alarm_status) => {
             const json = JSON.parse(alarm_status)
-            setAlarmReason(json["alarm_reason"]);
-            setAlarmOn(json["does_alarm_work"]);
+            const type = json["alarm_type"];
+            const status : AlarmStatus = {
+                alarm_reason: json["alarm_reason"],
+                does_alarm_work: json["does_alarm_work"],
+                alarm_type: type
+            };
+            setAlarmStatuses(alarmStatuses => new Map(alarmStatuses.set(type, { ...alarmStatuses.get(type), ...status })));
         });
     }, []);
 
@@ -229,8 +236,14 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
                 <RGBRemote open={rgbRemoteOpen} handleClose={handleRgbRemoteOpen} socket={socket}></RGBRemote>
                 <AlarmClockRemote open={alarmClockRemoteOpen} handleClose={handleAlarmClockRemoteOpen} socket={socket}></AlarmClockRemote>
                 <AlarmClockDialog open={alarmClockOn} handleClose={handleAlarmClockDialogClose} lastAlarmClockTime={lastAlarmClockTime} socket={socket}></AlarmClockDialog>
-                <AlarmDialog open={alarmOn} handleClose={handleAlarmDialogClose} reason={alarmReason} deviceService={deviceService}></AlarmDialog>
-            </Grid>
+                {Array.from(alarmStatuses.entries()).map(([key, status]) => (
+                    <AlarmDialog open={(status as AlarmStatus).does_alarm_work}
+                                 handleClose={() => handleAlarmDialogClose(key)}
+                                 reason={(status as AlarmStatus).alarm_reason}
+                                 alarmType={(status as AlarmStatus).alarm_type}
+                                 deviceService={deviceService}></AlarmDialog>
+                ))}
+                </Grid>
         </>
     );
 }
