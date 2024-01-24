@@ -8,7 +8,7 @@ import {
     Grid, Paper, PaperProps, TextField,
     Typography
 } from "@mui/material";
-import React from "react";
+import React, {useEffect, useRef} from "react";
 import {PopupMessage} from "../PopupMessage/PopupMessage.tsx";
 import {Password} from "../models/Password.ts";
 import {DeviceService} from "../services/DeviceService.ts";
@@ -40,6 +40,17 @@ export function AlarmDialog({open, handleClose, reason, alarmType, deviceService
     const [errorMessage, setErrorMessage] = React.useState<string>("");
     const [errorPopupOpen, setErrorPopupOpen] = React.useState<boolean>(false);
     const [isSuccess, setIsSuccess] = React.useState(true);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    useEffect(() => {
+        if (audioRef.current) {
+            if (!open) {
+                audioRef.current.pause();
+            } else {
+                audioRef.current.play();
+            }
+        }
+    }, [open]);
 
     const handleErrorPopupClose = (reason?: string) => {
         if (reason === 'clickaway') return;
@@ -114,6 +125,7 @@ export function AlarmDialog({open, handleClose, reason, alarmType, deviceService
             </Dialog>
             <PopupMessage message={errorMessage} isSuccess={isSuccess} handleClose={handleErrorPopupClose}
                           open={errorPopupOpen}/>
+            <audio ref={audioRef} src={"../waddup_invaders.mp3"} loop={true} />
         </>
     );
 }

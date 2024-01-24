@@ -233,11 +233,11 @@ def handle_mqtt_message(client, userdata, message):
             alarm_type = ""
             if "ALARM_ON_" in decoded_msg:
                 device_code = decoded_msg.split("_")[-1]
+                print(decoded_msg + "\n")
                 if "RPIR_MOTION" in decoded_msg:
                     alarm_type = "RPIR_MOTION"
                     set_last_alarm_reason("Room motion detected when no one's home (" + device_code + ")", alarm_type)
                 elif "DOOR_SENSOR" in decoded_msg:
-                    print("yes")
                     alarm_type = "DS_DURATION"
                     set_last_alarm_reason("Doors are open for more than 5 seconds (" + device_code + ")", alarm_type)
 
@@ -263,18 +263,18 @@ def handle_mqtt_message(client, userdata, message):
             return
 
 
-        #if "ALARM_ON_GSG_MOTION" in decoded_msg:
-        #    if alarm_triggered():
-        #       return
-        #  trigger_alarm()
-        # print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
-        #    set_last_alarm_reason("GSG motion detected (safe thief?!?!) (" + decoded_msg.split("_")[-1] + ") STIMKYYYYYYYY")
-        #    info = {
-        #        "alarm_reason": get_last_alarm_reason(),
-        #        "does_alarm_work": True
-        #    }
-        #    socketio_app.emit('alarm_status', json.dumps(info))
-        #    return
+        if "ALARM_ON_GSG_MOTION" in decoded_msg:
+            if alarm_triggered():
+               return
+            trigger_alarm()
+            print("ALARM ACTIVATED OH LAWD :OOOOOOOOOOOOOOOOOOOOOOOOOO")
+            set_last_alarm_reason("GSG motion detected (safe thief?!?!) (" + decoded_msg.split("_")[-1] + ") STIMKYYYYYYYY")
+            info = {
+                "alarm_reason": get_last_alarm_reason(),
+                "does_alarm_work": True
+            }
+            socketio_app.emit('alarm_status', json.dumps(info))
+            return
     
         global pi1_batch_size, pi2_batch_size, pi3_batch_size
         obj = json.loads(decoded_msg)
