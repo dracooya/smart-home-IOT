@@ -9,6 +9,7 @@ import {
     Typography
 } from "@mui/material";
 import {Socket} from "socket.io-client";
+import {useEffect, useRef} from "react";
 
 interface AlarmDialogProps {
     open: boolean,
@@ -19,10 +20,22 @@ interface AlarmDialogProps {
 
 export function AlarmClockDialog({open, handleClose, lastAlarmClockTime, socket}: AlarmDialogProps) {
 
+    const audioRef = useRef<HTMLAudioElement | null>(null);
     const disableAlarm = () => {
         socket.emit('alarm_clock_off', "off");
         handleClose();
     }
+
+    useEffect(() => {
+        if (audioRef.current) {
+            if (!open) {
+                audioRef.current.pause();
+            } else {
+                audioRef.current.play();
+            }
+        }
+    }, [open]);
+
 
     return (
         <>
@@ -46,6 +59,7 @@ export function AlarmClockDialog({open, handleClose, lastAlarmClockTime, socket}
                     </Grid>
                 </DialogActions>
             </Dialog>
+            <audio ref={audioRef} src={"../alarm_clock_sound.mp3"} loop={true} />
         </>
     );
 }

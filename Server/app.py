@@ -237,11 +237,11 @@ def handle_mqtt_message(client, userdata, message):
             alarm_type = ""
             if "ALARM_ON_" in decoded_msg:
                 device_code = decoded_msg.split("_")[-1]
+                print(decoded_msg + "\n")
                 if "RPIR_MOTION" in decoded_msg:
                     alarm_type = "RPIR_MOTION"
                     set_last_alarm_reason("Room motion detected when no one's home (" + device_code + ")", alarm_type)
                 elif "DOOR_SENSOR" in decoded_msg:
-                    print("yes")
                     alarm_type = "DS_DURATION"
                     set_last_alarm_reason("Doors are open for more than 5 seconds (" + device_code + ")", alarm_type)
                 elif "GSG_MOTION" in decoded_msg:
