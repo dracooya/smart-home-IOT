@@ -1,0 +1,50 @@
+{
+    "DS2": {
+        "simulated": true,
+        "pins": [27],
+        "pi": 2,
+        "name": "Door Sensor (Button) - Garage"
+    },
+    "DUS2": {
+        "simulated": true,
+        "pins": [24, 23],
+        "pi": 2,
+        "name": "Door Ultrasonic Sensor - Garage"
+    },
+    "DPIR2": {
+        "simulated": true,
+        "pins": [15],
+        "pi": 2,
+        "name": "Door Motion Sensor - Garage"
+    },
+    "RPIR3": {
+        "simulated": true,
+        "pins": [10],
+        "pi": 2,
+        "name": "Motion Sensor - Kitchen"
+    },
+    "GDHT": {
+        "simulated": true,
+        "pins": [17],
+        "pi": 2,
+        "name": "Temperature And Humidity Sensor - Garage"
+    },
+    "RDHT3": {
+        "simulated": true,
+        "pins": [11],
+        "pi": 2,
+        "name": "Temperature And Humidity Sensor - Kitchen"
+    },
+    "GLCD": {
+        "simulated": true,
+        "pins": [25, 24, 23, 17, 21, 22],
+        "pi": 2,
+        "name": "LCD - Garage"
+    },
+    "GSG": {
+        "simulated": true,
+        "pins": [2,3],
+        "pi": 2,
+        "name": "Gun Safe Gyroscope"
+    }
+}

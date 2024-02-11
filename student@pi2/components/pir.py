@@ -81,6 +81,6 @@ def run(code, settings, threads, stop_event):
     else:
         from sensors.pir import register
         thread = threading.Thread(target=register,
-                                  args=(settings["pins"][0], lambda x: motion(code, settings)))
+                                  args=(settings["pins"][0], lambda: motion(code, settings)))
         thread.start()
         threads.append(thread)

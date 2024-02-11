@@ -258,7 +258,7 @@ def handle_mqtt_message(client, userdata, message):
                     set_last_alarm_reason("Room motion detected when no one's home (" + device_code + ")", alarm_type)
                 elif "DOOR_SENSOR" in decoded_msg:
                     alarm_type = "DS_DURATION"
-                    set_last_alarm_reason("Doors are open for more than 5 seconds (" + device_code + ")", alarm_type)
+                    set_last_alarm_reason("Doors are open for more than 5 seconds (" + device_code + ") - Promaya", alarm_type)
                 elif "GSG_MOTION" in decoded_msg:
                     alarm_type = "GSG_MOTION"
                     set_last_alarm_reason("Gun safe motion detected (" + device_code + ")", alarm_type)

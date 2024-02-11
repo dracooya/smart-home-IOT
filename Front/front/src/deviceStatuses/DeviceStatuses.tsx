@@ -230,7 +230,7 @@ export function DeviceStatuses({deviceService} : DeviceStatusesProps) {
                             </Grid>
                         </TabPanel>
                         <TabPanel value={value} index={1}>
-                            <iframe src="http://localhost:3000/public-dashboards/f6a338cd2b40426aa4104297825b8815" width="100%" height="700px"></iframe>
+                            <iframe src="http://localhost:3000/public-dashboards/1dee33112b164846abd2142c38e20895" width="100%" height="700px"></iframe>
                         </TabPanel>
                 </Grid>
                 <RGBRemote open={rgbRemoteOpen} handleClose={handleRgbRemoteOpen} socket={socket}></RGBRemote>

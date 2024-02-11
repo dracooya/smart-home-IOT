@@ -9,9 +9,7 @@ from helpers.printer import print_status
 def led_register(code, pin, callback_fc, door_light_on_event, door_light_off_event):
     import paho.mqtt.client as mqtt
 
-    GPIO.setmode(GPIO.BCM)
     GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.LOW)
 
     def on_connect(client, userdata, flags, rc):
         print_status(code, "Connected to MQTT broker with result code " + str(rc))
@@ -19,11 +17,9 @@ def led_register(code, pin, callback_fc, door_light_on_event, door_light_off_eve
 
     def on_message(client, userdata, msg):
         def turn_off():
-            GPIO.output(pin, GPIO.LOW)
             callback_fc("OFF")
 
         if msg.payload.decode() == 'ON':
-            GPIO.output(pin, GPIO.HIGH)
             callback_fc("ON")
             scheduler = sched.scheduler(time.time, time.sleep)
             scheduler.enter(10, 1, turn_off)

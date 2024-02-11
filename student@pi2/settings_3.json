@@ -1,0 +1,43 @@
+{    
+    "RPIR4": {
+        "simulated": true,
+        "pins": [15],
+        "pi": 3,
+        "name": "Door Motion Sensor - Dinette"
+    },
+
+    "RDHT4": {
+        "simulated": true,
+        "pins": [16],
+        "pi": 3,
+        "name": "Temperature And Humidity Sensor - Owner's Suite"
+    },
+
+    "BB": {
+        "simulated": true,
+        "pins": [14],   
+        "pi": 3,
+        "name": "Bedroom Buzzer - Owner's Suite"
+    },
+
+    "B4SD": {
+        "simulated": true,
+        "pins": [11,4,23,8,7,10,18,25,22,27,17,24],
+        "pi": 3,
+        "name": "Bedroom 4 Digit 7 Segment Display - Owner's Suite"
+    },
+
+    "BIR": {
+        "simulated": true,
+        "pins": [26],
+        "pi": 3,
+        "name": "Bedroom Infrared Sensor - Owner's Suite"
+    },
+
+    "BGRB": {
+        "simulated": true,
+        "pins": [12,13,19],
+        "pi": 3,
+        "name": "Bedroom RGB Lights - Owner's Suite"
+    }
+}
